@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<head>
+<title>Matt Simmons</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<style>
+body {
+  background: #000300;
+  color: #5f5b56;
+  font-size: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+}
+a {
+  text-decoration: none;
+}
+.outer {
+  display: flex;
+  justify-content: center;
+}
+.info {
+  width: 390px;
+  margin-left: 10px;
+  color: #babbb6
+}
+.highlight {
+  color: #7e7e7e;
+}
+.extra1 a {color: #667;}
+.extra2 a {color: #576;}
+.extra3 a {color: #667;}
+.cooleh a {color: #748474;}
+.eva a {color: #888;}
+.bb a {color: #bebeee;}
+.blocks a {color: #789;}
+.github a {color: #3f8555;}
+.houston a {color: #397565;}
+.li a {color: #bb8;}
+.linkedin a {color: #aac;}
+.medium a {color: #9e95ef;}
+.observable a {color: #99a;}
+.playml a {color: #6D9680;}
+.elements a {color: rgb(251, 135, 119);}
+.pypi a {color: #a0a0c0;}
+.job-finder a {color: #6D9680;}
+.secret a {color: #595b66;}
+.twitter a {color: #1d9bf0;}
+.stack-overflow a {color: #c76350;}
+.soundcloud a {color: #655147;}
+.portfolio a {color: #666;}
+</style>
+
+<body>
+<div class="outer">
+  <pre><code id="main"></code></pre>
+  <pre class="info"><code id="info"></code></pre>
+<div>
+<script>
+// v3.3.0
+const thing = `
+                           #     ###### # ### ###         #      ###  #  ## ##### ### # ### ## #  # #    ##
+            ##           # # #            ##### #####      #### ### #####  ######## # ### # #### # #  # ####
+           ####               # #  ##  ##  ###            ####### ######### ####§7#### ## ## # # #  ###  ##
+                  ####    #  #   ###  ####  #   ## #      #### ##  ###  ########## #### ###    ###  # #### #
+         ## ## ###           #   #  ##§a# # ## #           #  # #  ### ########## ##### ######    ####  ####
+     ###      #    #     #   # ### ## # # #     #   ## #####  ###### ## ###§b####### #  #### #### #####  ##
+        ##  # # #    ### #    ##  # ##      # ##   ## #####    #### # #soundcloud### ####    #  ## #########
+       # # ###    ###   #      #  #######   ######   #  #### ####### ######### ## ###   #      ####### #####
+   ## ## # #                              ## ###  ## ### ### ### ######§8# #### #linkedin #   # # #  ### ##
+  ## #  ####       #  #            ## ### #  #        #     # ######  ##### ##### ## ## # ## ## ############
+     ### #§c ##    ##  #           # ###  ####    ######   ## # ######## ##### ## ###    # # ###### ########
+  # ##  ####  #     #  #            ##  #  ## ###     ##  ###   ###   ###play-ml #  ##  #  #### #####§1#####
+   #### # ## ##  # #  #         # #   ###  #  #   ### ## ##  ##  #  ### #### #######    #### ##d3### #######
+    ## #cooleh#               ##  #   ##  ## ##  # ## # ##      # ###  ## #    ### #  # ##observable## ##  #
+   # # ####  #          #      #  #####     ###§6#### ##   # ##   # ## #   #  ## ### ## # ##  # # # #### ###
+  ##§bb# ### #     #          #  #  #      #### ## #### ##  ##  ##  ### ####### ## # ### # ### ##  # #  # ##
+    ###### #        #   #      ##  # # ## ###### ### ## #   # # ### # #  ## #### ###   ##job finder# #######
+   # ##### ##eva       #  #   #     # ### # ######       #  ##### ##  #####houston ##  ### #####  ##########
+   ###         #     ##       ##    # ##  # #### ##         #   ####  # # # ### # ## #  ## ##### #####§3##
+   ##  ##  #                     ####medium#  ### #  # #        ## ###  # ####  # # ##   #  ## #############
+   ### # # # ##              #   ## #####  # ###           # ##  #  ## ### # #######   # #  ##   ## # ######
+     # li.js.org #         #    ## #  ###  ### ###     #     #  #   ##   # ####§2 ## # ### # ## ############
+   # # # #  ## # #            # #### # #### # #  #   ## #    # #  # #  # # ## #### ### ##stack overflow# # #
+   #   ###                # # ## ## #   # ##    # ##  # ##  ### #  # #  ## ###twitter ## ## #### # #      #
+   # #### #    #       #     #    #  # ###  # # ### # ## ##  #  #   #     #  ####### ###### # #            #
+  ## # ## # #       #     # # #   #  ###  # ##    # #####  ## #  ## ### ## github######   ## ### #    #
+  #    ##   ###  #         #     #   #      #  #   #   #####  ##  # # ###### #### ###§5##pypi## ###   #  # #
+    #  #  ####  # #  #          ###    #  ##  #     # #  #  ###  # # ##### # #  ##  # ### ##  ######  # # #
+   # # ### ###  #  ##  #   # ##  #  #     #    #  # ##### #### #  ##### ### ## #  #  # ## # # # ## ### # ###
+  # # ## ## ## # ### # ## #    # ##  #  #    # ###### #elements## ### ### # # ### # # ###  # ###     ## #  #
+  #§9 ## # #  # # #### # #### ## #  #  ## #  # ## ## ##### ## # ####  # #  ## ## #####  ##### #     #   ###
+  # ### ### ### ## #### ##  # #  #   #  #  ## # ###  # #  ## ## #####  # #   #  #######   ###     #  # ### #
+  MATT SIMMONS #   # ##  #  #  #  ##      #    #  # ## ### ## ###§4### #### #  #######  ##  ########    # ##
+  I EXPERIMENT WITH CODE# #  # # # ### #   #  #      ## #  ## #### ## # ##### ## ##  ### #### # ## ## #  ###
+  LONDON UK  # #   # # ## # ### # ##    #    #  # #  # #      ## ## #  ### ### #### ## 12KB PORTFOLIO © 2022
+`
+let content = thing;
+const main = document.getElementById("main")
+const info = document.getElementById("info")
+
+const things = [
+  ["§a", `<span class="secret"><a href="https://game-ii.s3.eu-west-2.amazonaws.com/game_0.7.html">&quest;</a><span></span></span>#`],
+  ["§b", `<span class="secret"><a href="https://game-ii.s3.eu-west-2.amazonaws.com/labs/planes.html">&quest;</a><span></span></span>#`],
+  ["github", `<span class="github"><a href="https://github.com/MattSimmons1">g</a><span>#####</span></span>`],
+  ["twitter", `<span class="twitter"><a href="https://twitter.com/MattSimmons01">t</a><span>### ##</span></span>`],
+  ["medium", `<span class="medium"><a href="https://medium.com/@matt.simmons">m</a><span>### #</span></span>`],
+  ["cooleh", `<span class="cooleh"><a href="https://github.com/MattSimmons1/cooleh">c</a><span>#### </span></span>`],
+  ["d3", `<span class="blocks"><a href="https://bl.ocks.org/mattsimmons1">d3</a><span></span></span>`],
+  ["observable", `<span class="observable"><a href="https://observablehq.com/@mattsimmons1">o</a><span>#########</span></span>`],
+  ["§c", `<span class="extra1"><a href="https://medium.com/datasparq-technology/elon-musks-5-steps-of-engineering-applied-to-software-a7963fef9887">#</a><span></span></span>#`],
+  ["§1", `<span class="extra1"><a href="https://observablehq.com/@mattsimmons1/us-elections-stacked-bar-transition">#</a><span></span></span>#`],
+  ["§2", `<span class="extra1"><a href="https://twitter.com/MattSimmons01/status/1299327195022790656">#</a><span></span></span>#`],  // pokemon cards
+  ["§3", `<span class="extra2"><a href="https://twitter.com/MattSimmons01/status/1251436769721167877">#</a><span></span></span>#`],  // flip card
+  ["§4", `<span class="extra2"><a href="https://medium.com/datasparq-technology/why-i-like-go-so-much-with-examples-8583e73895d3">#</a><span></span></span>#`],
+  ["§5", `<span class="extra2"><a href="https://medium.com/datasparq-technology/so-you-think-you-know-python-9c0d8dc8451e">#</a><span></span></span>#`],
+  ["§6", `<span class="extra3"><a href="https://bl.ocks.org/MattSimmons1/raw/226118accde4f7d0652ae65de098b64c">#</a><span></span></span>#`],
+  ["§7", `<span class="extra3"><a href="https://bl.ocks.org/mattsimmons1/cdf0fcd601ca5e2da65440e733c398ef">#</a><span></span></span>#`],
+  ["§8", `<span class="extra3"><a href="https://bl.ocks.org/mattsimmons1/fc7c4fc9506877de4162c9e5ffd51bb8">#</a><span></span></span>#`],
+  ["§9", `<span class="extra3"><a href="https://medium.com/datasparq-technology/so-you-think-you-know-python-9c0d8dc8451e">#</a><span></span></span>#`],
+  ["eva", `<span class="eva"><a href="https://github.com/MattSimmons1/eva">e</a><span>  </span></span>`],
+  ["§bb", `#<span class="bb"><a href="https://mattsimmons1.github.io/bb/">bb</a><span></span></span>`],
+  ["li.js.org", `<span class="li"><a href="https://li.js.org">li</a><span>##  #  </span></span>`],
+  ["linkedin", `<span class="linkedin"><a href="https://www.linkedin.com/in/matt-simmons-0470a7106/">l</a><span>####   </span></span>`],
+  ["pypi", `<span class="pypi"><a href="https://pypi.org/user/MattSimmons01/">p</a><span>###</span></span>`],
+  ["play-ml", `<span class="playml"><a href="https://play-ml.datasparq.ai">p</a><span># #   </span></span>`],
+  ["houston", `<span class="houston"><a href="https://callhouston.io">h</a><span>## ###</span></span>`],
+  ["elements", `<span class="elements"><a href="https://datasparq.ai/elements-of-engineering-google/">e</a><span># ## ##</span></span>`],
+  ["job finder", `<span class="job-finder"><a href="https://labs.datasparq.ai/job-finder-machine/">j</a><span>####    #</span></span>`],
+  ["stack overflow", `<span class="stack-overflow"><a href="https://stackoverflow.com/users/10015714/matt-simmons">s</a><span>##  ##  # # #</span></span>`],
+  ["soundcloud", `<span class="soundcloud"><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">s</a><span>###### ##</span></span>`],
+  ["12KB PORTFOLIO", `<span class="portfolio"><a>12KB PORTFOLIO</a><span></span></span>`],
+  ["MATT SIMMONS", `<span style="color: #7a7e7e">MATT SIMMONS</span>`],
+  ["I EXPERIMENT WITH CODE", `<span style="color: #6e6e6e">I EXPERIMENT WITH CODE</span>`],
+  ["LONDON UK", `<span style="color: #666">LONDON UK</span>`],
+]
+for (let i = 0; i < things.length; i++) {
+  content = content.replace(things[i][0], things[i][1])
+}
+
+
+
+
+main.innerHTML = content;
+
+function reveal(query, revealText, infoText="") {
+  const revealElement = document.querySelector("span" + query + " span")
+  const original = revealElement.innerText
+
+  document.querySelector("span" + query + " a").addEventListener('mouseenter', e => {
+    revealElement.innerText = revealText;
+    revealElement.setAttribute("class", "highlight")
+    info.innerHTML = infoText
+  });
+  document.querySelector(query).addEventListener('mouseleave', e => {
+    revealElement.innerText = original;
+    revealElement.setAttribute("class", "")
+    info.innerHTML = ""
+  });
+}
+
+reveal(".bb", "", `
+bb
+
+A data serialisation language (like JSON
+or YAML) written in go. bb allows the
+user to define their own syntax and
+enter data in the way they want to.`)
+
+reveal(".blocks", "", `
+bl.ocks.org Profile
+
+Some of my data viz work with D3.js.`)
+
+reveal(".observable", "bservable", `
+Observable Profile
+
+Some of my data viz work with D3.js on
+observablehq.com.`)
+
+reveal(".cooleh", "ooleh", `
+cooleh
+
+Ultra lightweight web server to help
+with local development.`)
+
+reveal(".twitter", "witter", `
+Twitter
+
+My Twitter account. The best way to
+contact me with questions about my work.`)
+
+reveal(".medium", "edium", `
+Medium
+
+My blog. Articles about programming and
+data engineering.`)
+
+reveal(".li", ".js.org", `
+li.js.org
+
+JS script that can automatically
+convert markdown to HTML within a single
+page, without the need for any code.
+Also extends markdown syntax with D3
+charts and some custom layout functions.`)
+
+reveal(".linkedin", "inkedin", `
+LinkedIn Profile
+
+Follow me here for updates.`)
+
+reveal(".github", "ithub", `
+GitHub
+
+My GitHub profile. All my code projects
+can be found here.`)
+
+reveal(".houston", "ouston", `
+Houston
+
+I helped create this workflow
+orchestration API and designed the
+mission dashboard.`)
+
+reveal(".eva", "va", `
+eva
+
+Command line tool written in go.
+Displays a 5 minute timer in the style
+of Neon Genesis Evangelion's power
+supply timer.`)
+
+reveal(".playml", "lay-ml", `
+PlayML
+
+A collection of data science and stats
+visualisations built with React, D3.js
+and the Observable runtime. I designed
+and built the front-end and web server.
+
+Articles were created in collaboration
+with data scientists at DATASPARQ.`)
+
+reveal(".elements", "lements", `
+Elements of Engineering Scrolly
+
+I created this scrolly article from
+scratch with D3.js`)
+
+reveal(".pypi", "ypi", `
+PyPi Profile
+
+Here you can find Python packages that
+I've published, including the Python
+client for bb.`)
+
+reveal(".job-finder", "ob finder", `
+Job Finder Machine
+
+I created the web front-end for this
+ML powered job search tool.`)
+
+reveal(".stack-overflow", "tack overflow", `
+Stack Overflow Profile
+
+Sometimes I answer questions here.`)
+
+reveal(".soundcloud", "oundcloud", `
+SoundCloud
+
+My SoundCloud artist page were I rap
+about Python and Go.`)
+
+reveal(".portfolio", "", `
+This Portfolio
+
+I wanted a simple portfolio that has
+space for all of my work. Each letter
+links to something I made or worked on.`)
+
+</script>
+</body>
