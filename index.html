@@ -15,7 +15,12 @@
 		/*background: #1d1b16;*/
 		color: #f3f2ea;
 		font-size: 12px;
-		height: 100vh;
+		/*height: 100vh;*/
+		-ms-overflow-style: none;  /* IE and Edge */
+		scrollbar-width: none;  /* Firefox */
+	}
+	body::-webkit-scrollbar {
+		display: none;
 	}
 	button {
 		background: #0000;
@@ -25,10 +30,14 @@
 	pre {
 		max-width: 100vw;
 		overflow-x: hidden;
+		display: block;
+	}
+	code {
+		display: block;
 	}
 	pre#folio {
 		color: #595962;
-		white-space: pre-wrap;
+		/*white-space: pre-wrap;*/
 		width: 735px;
 	}
 	button {
@@ -36,12 +45,11 @@
 	}
 	main {
 		margin: 0;
-		padding: 0;
+		padding: 15vh 0 20vh 0;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		height: 100vh;
 		overflow-x: hidden;
 	}
 	/* mobile site */
@@ -200,6 +208,7 @@
 
 	<main>
 	  <pre><code id="art"></code></pre>
+
 	  <pre id="folio"><code>
 matt simmons
 
