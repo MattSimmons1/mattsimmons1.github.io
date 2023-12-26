@@ -10,7 +10,7 @@
 <style>
 	body {
 		margin: 0;
-		overflow: hidden;
+		overflow-x: hidden;
 		background: #100f0d;
 		/*background: #1d1b16;*/
 		color: #f3f2ea;
@@ -66,20 +66,24 @@
 		text-decoration: none;
 		color: #595962;
 	}
-	.cooleh:hover a {color: #748474;}
-	.eva:hover a {color: #888;}
-	.bb:hover a {color: #bebeee;}
-	.github:hover a {color: #a5a6ab;}
-	.houston:hover a {color: #397565;}
-	.li:hover a {color: #d0cfae;}
-	.linkedin:hover a {color: #aac;}
-	.medium:hover a {color: #a0bab0;}
-	.observable:hover a {color: #99a;}
-	.playml:hover a {color: #6D9680;}
-	.elements:hover a {color: #655147;}
-	.twitter:hover a {color: #71a6cb;}
-	/*.twitter:hover a {color: #1d9bf0;}*/
-	.stack-overflow:hover a {color: #af7b71;}
+	a:hover {
+		text-decoration: underline;
+		/*text-decoration-color: white;*/
+	}
+	.cooleh a {color: #748474;}
+	.eva a {color: #888;}
+	.bb a {color: #bebeee;}
+	.github a {color: #a5a6ab;}
+	.houston a {color: #397565;}
+	.li a {color: #d0cfae;}
+	.linkedin a {color: #aac;}
+	.medium a {color: #a0bab0;}
+	.observable a {color: #99a;}
+	.playml a {color: #6D9680;}
+	.elements a {color: #655147;}
+	.twitter a {color: #71a6cb;}
+	.stack-overflow a {color: #af7b71;}
+	.leetcode a {color: #d75a3d;}
 </style>
 
 <body>
@@ -196,12 +200,37 @@
 
 	<main>
 	  <pre><code id="art"></code></pre>
-	  <pre id="folio"><code>           matt simmons
-projects \ <span class="bb"><a href="https://mattsimmons1.github.io/bb/">bb</a></span> · <span class="houston"><a href="https://callhouston.io">houston</a></span> · <span class="eva"><a href="https://github.com/MattSimmons1/eva">eva</a></span> · <span class="cooleh"><a href="https://github.com/MattSimmons1/cooleh">cooleh</a></span> · <span class="li"><a href="https://li.js.org">li</a></span> · <span class="playml"><a href="https://play-ml.datasparq.ai">play-ml</a></span> · <span class="elements"><a href="https://datasparq.ai/elements-of-engineering-google/">elements</a></span>
-    code \ <span class="github"><a href="https://github.com/MattSimmons1">github</a></span> · <span class="stack-overflow"><a href="https://stackoverflow.com/users/10015714/matt-simmons">stack overflow</a></span> · <span class="elements"><a href="https://leetcode.com/user4281EZ/">leetcode</a></span> · <span class="observable"><a href="https://observablehq.com/@mattsimmons1">observable</a></span>
-   blogs \ <span class="medium"><a href="https://medium.com/@matt.simmons">medium</a></span> · <span class="github"><a href="./blog/index.html">photography</a></span>
-   other \ <span class="twitter"><a href="https://twitter.com/MattSimmons01">twitter</a></span> · <span class="linkedin"><a href="https://www.linkedin.com/in/matt-simmons-0470a7106/">linkedin</a></span></code></pre>
-	</main>
+	  <pre id="folio"><code>
+matt simmons
+
+projects
+--------
+<span class="bb"><a href="https://mattsimmons1.github.io/bb/">bb</a></span> ············· data serialisation language
+<span class="houston"><a href="https://callhouston.io">houston</a></span> ········ workflow orchestration api
+<span class="eva"><a href="https://github.com/MattSimmons1/eva">eva</a></span> ············ evangelion inspired timer
+<span class="cooleh"><a href="https://github.com/MattSimmons1/cooleh">cooleh</a></span> ········· simple web server
+<span class="li"><a href="https://li.js.org">li</a></span> ············· automatic text formatter
+<span class="playml"><a href="https://play-ml.datasparq.ai">play ml</a></span> ········ data science visualisation
+<span class="elements"><a href="https://datasparq.ai/elements-of-engineering-google/">elements</a></span> ······· scrolly article
+
+blogs
+-----
+<span class="medium"><a href="https://medium.com/@matt.simmons">medium</a></span> ········· articles about engineering
+<span class="github"><a href="./blog/index.html">photography</a></span> ···· my best photos
+
+code
+----
+<span class="github"><a href="https://github.com/MattSimmons1">github</a></span> ········· public projects
+<span class="stack-overflow"><a href="https://stackoverflow.com/users/10015714/matt-simmons">stack overflow</a></span> · profile
+<span class="elements"><a href="https://leetcode.com/user4281EZ/">leetcode</a></span> ······· solutions
+<span class="observable"><a href="https://observablehq.com/@mattsimmons1">observable</a></span> ····· notebooks
+
+other
+-----
+<span class="twitter"><a href="https://twitter.com/MattSimmons01">twitter</a></span> ········ tweets
+<span class="linkedin"><a href="https://www.linkedin.com/in/matt-simmons-0470a7106/">linkedin</a></span> ······· hire me
+</code></pre>
+</main>
 
 </body>
 
