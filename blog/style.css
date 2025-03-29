@@ -13,6 +13,7 @@ p, h3 {
 }
 h1, h2 {
     font-family: 'Abril Fatface', cursive;
+    margin: 1em 0 0.5em 0;
 }
 main {
     width: 900px;
