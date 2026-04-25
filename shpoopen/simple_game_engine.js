@@ -45,7 +45,6 @@ class Player {
   
   initControls() {
     document.addEventListener("keydown", (event) => {
-      console.log(event.key);
       switch (event.key) {
         case "ArrowUp":
           this.heldKeys["ArrowUp"] = true
@@ -84,6 +83,37 @@ class Player {
           this.heldKeys["ArrowRight"] = false
           break;
       }
+    })
+    const startEvents = ['mousedown', 'touchstart']
+    startEvents.forEach( evt => {
+      document.getElementById("leftButton").addEventListener(evt, () => {
+        this.heldKeys["ArrowLeft"] = true
+      })
+      document.getElementById("rightButton").addEventListener(evt, () => {
+        this.heldKeys["ArrowRight"] = true
+      })
+      document.getElementById("jumpButton").addEventListener(evt, () => {
+        if (!this.isAirborne) {
+          // jump
+          this.acceleration.y = -150
+          this.isAirborne = true
+        } else {
+          // holding jump extends the jump slightly
+          this.acceleration.y += -5
+      }
+      })
+    })
+    const endEvents = ['mouseup', 'touchend']
+    endEvents.forEach( evt => {
+      document.getElementById("leftButton").addEventListener(evt, () => {
+        this.heldKeys["ArrowLeft"] = false
+      })
+      document.getElementById("rightButton").addEventListener(evt, () => {
+        this.heldKeys["ArrowRight"] = false
+      })
+      document.getElementById("jumpButton").addEventListener(evt, () => {
+        this.heldKeys["ArrowUp"] = false
+      })
     })
   }
 }
