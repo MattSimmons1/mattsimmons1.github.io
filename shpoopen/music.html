@@ -1,0 +1,890 @@
+
+<style>
+	body {
+		margin: 0;
+		overflow-x: hidden;
+		/*height: 100vh;*/
+		-ms-overflow-style: none;  /* IE and Edge */
+		scrollbar-width: none;  /* Firefox */
+	}
+  body, textarea {
+    color: #f3f2ea;
+    font-size: 12px;
+    font-family: monospace;
+    text-align: left;
+    line-height: 7px;
+    background: #100f0d;
+		/*background: #1d1b16;*/
+  }
+	body::-webkit-scrollbar {
+		display: none;
+	}
+
+  main {
+		margin: 0;
+		/* padding: 15vh 0 20vh 0; */
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		overflow-x: hidden;
+	}
+  button {
+    border: 2px solid white;
+    background: none;
+    color: white;
+    font-family: monospace;
+    padding: 5px;
+  }
+  button:hover {
+    /* background: dimgray; */
+    border-color: #6ca9df;
+    color: #6ca9df;
+  }
+  button:active {
+    background: white;
+    border-color: white;
+    color: black;
+  }
+
+  .column-container {
+    display: flex;
+    flex-direction: row;
+    gap: 0;
+  }
+
+  .pinboard {
+    position: relative;
+    margin-bottom: 10px;
+  }
+
+  textarea.gridinput, p.gridoverlay {
+      overflow: hidden;
+      resize: none;
+      outline: none;
+      border: none;
+      white-space: pre;
+      height: 250px;
+      /* width: 1000px; */
+      padding: 0;
+      margin: 0;
+  }
+  textarea.gridinput {
+      color: #0000;
+      caret-color: white;
+      /* caret-shape: block; */
+  }
+  p.gridoverlay, p.mapTile {
+    position: absolute;
+    white-space: pre;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    background: transparent;
+    color: #303133;
+    pointer-events: none;
+  }
+
+  #scene {
+    position: relative;
+  }
+  #scene p {
+    position: absolute;
+    width: 500px;
+    height: 310px;
+    top: 0;
+    left: 0;
+    white-space: pre;
+    color: white;
+  }
+
+  .worldMap {
+    display: grid;
+  }
+  p.mapTile {
+    position: unset;
+    margin: 0;
+  }
+
+</style>
+<main>
+  <script src="http://unpkg.com/tone"></script>
+
+  <p>MUSIC</p>
+  <!-- <div class="row-container"> -->
+    <div class="pinboard" id="roll1">
+      <textarea name="input1" class="gridinput" rows="57" cols="36" wrap="hard" spellcheck="false"></textarea>
+      <p class="gridoverlay"></p>
+    </div>
+    <!-- <div class="pinboard" id="roll2">
+      <textarea name="input2" class="gridinput" rows="8" cols="36" wrap="hard" spellcheck="false"></textarea>
+      <p class="gridoverlay"></p>
+    </div>
+    <div class="pinboard" id="roll3">
+      <textarea name="input3" class="gridinput" rows="8" cols="36" wrap="hard" spellcheck="false"></textarea>
+      <p class="gridoverlay"></p>
+    </div>
+    <div class="pinboard" id="roll4">
+      <textarea name="input4" class="gridinput" rows="8" cols="36" wrap="hard" spellcheck="false"></textarea>
+      <p class="gridoverlay"></p>
+    </div> -->
+  <button>play</button>
+<br>
+<br>
+<br>
+
+<p style="white-space: pre; line-height: 1em;">
+Use: 
+    #  make a sharp
+    /  go up an octave
+    \  go down an octave
+
+    1-7  play the note in the scale
+
+Why does this exist? For fun! Now you can combine ascii art and music.
+</p>
+</main>
+
+  <script>
+
+    const nColumns = 36;
+    const nRows = 8 * 4 + 4 + 1;  // make sure rows don't exceed the element height
+
+    // global - will be constantly updated as user inputs notes, but will always remain the same object
+    let rolls = {}
+
+    const palette = {
+      white: "#f3f2ea",
+      dimGreen: "#999e97",
+      darkPurple: "#5c4a55",
+      lilac: "#bebeee",
+      darkLilac: "#988b8e",
+      lightGrey: "#b1b6b4",
+      lightBlue: "#b1b6cf",
+      grey: "#a5a6ab",
+      blueGrey: "#d1dae0",
+      darkGrey: "#757575",
+      darkerGrey: "#555555",
+      turquoise: "#a0bab0",
+      darkRed: "#955b69",
+      red: "#ffd3c4",
+      lightYellow: "#faf8c5",
+      blue: "#bcd6f2",
+      lightPink: "#e7bab7",
+      darkYellow: "#b5a271",
+      darkPink: "#ccb2a9",
+      green: "#ace8b6",//"#aaf0b8",
+      lightGreen: "#daffc9",
+      darkGreen: "#62665a",
+      cyan: "#c9ffee",
+    }
+
+    function cleanseGridValue(value, nRows, nColumns) {
+      // make sure we always have the same number of lines
+      let valueArr = [...value.split("\n"), ...Array(nRows).fill(" ".repeat(nColumns))]
+      valueArr = valueArr.slice(0, nRows)
+
+      // make sure each line is exactly the right length. add '·' or remove characters
+      valueArr = valueArr.map((d, i) => {
+        // TODO: data is lost
+        return (d + " ".repeat(nColumns)).slice(0, nColumns)
+      })
+
+      return valueArr.join("\n")
+    }
+
+    function getInputSelection(el) {
+    var start = 0, end = 0, normalizedValue, range,
+        textInputRange, len, endRange;
+
+    if (typeof el.selectionStart == "number" && typeof el.selectionEnd == "number") {
+        start = el.selectionStart;
+        end = el.selectionEnd;
+    } else {
+        range = document.selection.createRange();
+
+        if (range && range.parentElement() == el) {
+            len = el.value.length;
+            normalizedValue = el.value.replace(/\r\n/g, "\n");
+
+            // Create a working TextRange that lives only in the input
+            textInputRange = el.createTextRange();
+            textInputRange.moveToBookmark(range.getBookmark());
+
+            // Check if the start and end of the selection are at the very end
+            // of the input, since moveStart/moveEnd doesn't return what we want
+            // in those cases
+            endRange = el.createTextRange();
+            endRange.collapse(false);
+
+            if (textInputRange.compareEndPoints("StartToEnd", endRange) > -1) {
+                start = end = len;
+            } else {
+                start = -textInputRange.moveStart("character", -len);
+                start += normalizedValue.slice(0, start).split("\n").length - 1;
+
+                if (textInputRange.compareEndPoints("EndToEnd", endRange) > -1) {
+                    end = len;
+                } else {
+                    end = -textInputRange.moveEnd("character", -len);
+                    end += normalizedValue.slice(0, end).split("\n").length - 1;
+                }
+            }
+        }
+    }
+
+    return {
+        start: start,
+        end: end
+    };
+  }
+
+    function offsetToRangeCharacterMove(el, offset) {
+        return offset - (el.value.slice(0, offset).split("\r\n").length - 1);
+    }
+
+    function setInputSelection(el, startOffset, endOffset) {
+        if (typeof el.selectionStart == "number" && typeof el.selectionEnd == "number") {
+            el.selectionStart = startOffset;
+            el.selectionEnd = endOffset;
+        } else {
+            var range = el.createTextRange();
+            var startCharMove = offsetToRangeCharacterMove(el, startOffset);
+            range.collapse(true);
+            if (startOffset == endOffset) {
+                range.move("character", startCharMove);
+            } else {
+                range.moveEnd("character", offsetToRangeCharacterMove(el, endOffset));
+                range.moveStart("character", startCharMove);
+            }
+            range.select();
+        }
+    }
+
+    function parsePinboard(value) {
+      // default palette
+      const characterColours = [
+        // in order of brightness
+        // ["●", "#393130", "#999997"],
+        ["#", palette.lightGrey,],
+        ["@", palette.white],//, "#595160", "#999997"],
+        ["W", palette.lightYellow],//"#696170", "#999997"],
+        ["X", palette.red, palette.lightGreen],//, "#797180", "#999997"],
+        ["N", palette.lightGrey, "#ffe8e4"],
+        ["E", palette.darkRed, "#f8eae8"], // brick
+        ["F", "#ffe8e4"],
+        ["Z", palette.darkYellow, palette.cyan],//"#797180", "#999997"],
+        ["0", palette.white],//"#494150", "#999997"],
+        ["%", palette.white],//"#a38c87"],
+        ["œ", "#a08481", "b58481"],
+        ["ø", "#918481"],
+        ["∆", "#9e959e"],
+        ["◊", "#e8ffe4"],
+        ["π", "#ffe8e4"],
+        ["*", "#bebeee"],
+        ["¬", palette.white],
+        ["-", "#9e959e"],
+        ["_", "#9e959e"],
+        ["=", "#cb9fd6"],
+        ["≈", "#ffe8e4"],
+        ["+", palette.white],// "#98a177"],
+        ["~", "#4272eb"],
+        ["˚", "#ffe8e4"],
+        [".", "#faacf7"],
+        [",", "#faacf7"],
+        ["‚", "#eaace7"],
+        ["•", "#b6c3fc"],
+        ["·", palette.lightBlue, palette.lightGrey, palette.lightPink],// "#cceac7"],
+        ["'", "#b6e0d2"],
+        ["\"", "#a3de9e"],
+        ["`", "#c4e6f2"],
+        [":", "#de6b24"],
+        [";", "#844ae0"],
+        ["|", "#999090"],
+        ["_", "#999090"],
+        ["^", "#9e959e"],
+        [">", "#bda799"],
+        ["<", "#9194b5"],
+        ["$", "#427a6a"],
+        ["§", "MediumSeaGreen"],
+        ["!", "MediumSeaGreen"],
+        ["\\", palette.darkGrey],
+        ["/", palette.darkGrey],// "#9e959e"],
+        ["╲", "#9e959e"],
+        ["[", "MediumSeaGreen"],
+        ["]", "Aquamarine"],
+        ["{", "Red"],
+        ["}", "Violet"],
+        ["a", palette.lightPink],
+        ["6", palette.lightPink],
+        ["b", palette.blue],
+        ["7", palette.blue],
+        ["c", palette.lightGreen],
+        ["1", palette.lightGreen],
+        ["d", palette.lightYellow],
+        ["2", palette.lightYellow],
+        ["e", palette.cyan],//"CadetBlue"],
+        ["3", palette.cyan],//"CadetBlue"],
+        ["f", "PeachPuff"],
+        ["4", "PeachPuff"],
+        ["g", palette.lightBlue],
+        ["5", palette.lightBlue],
+        ["h", "#a9d1ad"],
+        ["i", "MediumSeaGreen"],
+        ["j", "MediumSeaGreen"],
+        ["k", palette.lightGrey],//"#706468"],
+        ["l", "Lavender"],
+        ["m", "#3e9c6e"],
+        ["n", "MediumSeaGreen"],
+        ["o", "#eba054"],
+        ["p", "pink"],
+        ["q", "MediumSeaGreen"],
+        ["r", "Red"],
+        ["s", "SeaGreen"],
+        ["t", "Teal"],
+        ["u", "BlueViolet"],
+        ["v", "#ffdfff"],//"Violet"],
+        ["w", palette.green],//"DarkSeaGreen"],
+        ["x", palette.white],//"#706664", "#79736a"],
+        ["y", "Yellow"],
+        ["z", "#bfbfbf"],
+        ["H", "#966a3b"],      
+      ]
+
+      const allReplacements = characterColours.map(d => d[0])
+
+      // // check each character once to see if it should be replaced
+      // value_rows = value.split("\n").map(d => {
+      //   return d.split("").map(dd => {
+      //     if (dd == " ") {
+      //       return "·"
+      //     }
+      //     else if (allReplacements.includes(dd)) {
+      //       const replacement = characterColours.find(ddd => ddd[0] == dd)[1]
+      //       return `<span style="color:${replacement};">${dd}</span>`
+      //     } else {
+      //       return `<span style="color:white;">${dd}</span>`
+      //     }
+      //   }).join("")
+      // })
+
+      const value_rows = value.split("\n")
+
+      const rendered_rows = []
+      let lastChar = ""
+      for (let i = 0; i < nRows; i++) {
+        const row = value_rows[i]
+        rendered_row = []
+        let pos = 0
+        
+        while (pos < nColumns) {
+
+          // if (pos == 1) {
+            // rendered_row.push(" ")
+          // }
+
+          // handle commands
+
+          // process character as normal
+          let dd = row[pos]
+          if (!dd) {
+            console.log("not dd", dd)
+            rendered_row.push("·")
+          }
+          else if (dd == " ") {
+            if (i == 1 && pos == 0) {
+              rendered_row.push("·")
+            } else if (i%9 == 0 || i == nRows - 1) {
+              rendered_row.push(" ")
+            } else {
+              rendered_row.push(pos <= 3 ? " " : "·")
+              // rendered_row.push(pos == 3 ? " " : "·")
+            }
+          } else if (allReplacements.includes(dd)) {
+            let colour
+            if (i%9 == 0 || i == nRows - 1) {
+              colour = palette.darkerGrey
+            // special rules for sharps
+            } else if (dd == '#' && pos > 0) {
+              // look behind to match previous character
+              const prevChar = row[pos - 1]
+              if (prevChar == ' ') {
+                colour = palette.darkerGrey;
+              } else if (allReplacements.includes(prevChar)) {
+                // TODO: if sharp doesn't exist, use red
+                colour = characterColours.find(ddd => ddd[0] == prevChar)[1]
+                dd = "♯"
+              } else {
+                colour = "white";
+              }
+            } else {
+              colour = characterColours.find(ddd => ddd[0] == dd)[1]
+            }
+
+            if (dd == "♯") {
+              rendered_row.push(`<span style="color:${colour}; margin: 0 1.5px 0 -1.5px" time="${pos}">♯</span>`)
+            } else {
+              rendered_row.push(`<span style="color:${colour};" time="${pos + Math.floor(i/9) * (nColumns - 4)}">${dd}</span>`)
+            }
+          } else {
+            rendered_row.push(`<span style="color:white;" time="${pos + Math.floor(i/9) * (nColumns - 4)}">${dd}</span>`)
+          }
+          pos++  
+        }
+        rendered_rows.push(rendered_row.join(""))
+      }
+
+      value = rendered_rows.join("\n")
+
+      // convert pinboard value to overlay HTML
+      // value = value.replace(/ /g, '·').replace(/[^·\nf#|]/g, ' ')
+      // .replaceAll('#', '<span style="color: #de6b24;">#</span>')
+      // .replaceAll('|', '<span style="color: #eeaaff;">|</span>')
+
+      // for (let i = 0; i < characterColours.length; i++) {
+        // value = value.replaceAll(characterColours[i][0], `<span style="color: ${characterColours[i][1]};">${characterColours[i][0]}</span>`)
+      // }
+      
+
+      return value
+    }
+
+    document.addEventListener("DOMContentLoaded", e => {
+
+      const grids = document.querySelectorAll(".gridinput")
+      const pinboards = document.querySelectorAll(".pinboard")
+      console.log(pinboards)
+
+      
+      for (const pinboard of pinboards) {
+        const grid = pinboard.querySelector(".gridinput")
+        const overlay = pinboard.querySelector(".gridoverlay")
+        
+        // initial value
+        // grid.value = " " //levels["1,0"]
+        grid.value = Array(nRows).fill(" ".repeat(nColumns)).join("\n")
+        rolls[pinboard.id] = grid.value
+        overlay.innerHTML = parsePinboard(grid.value)
+
+        const playerElement = pinboard.querySelector(".sprite")
+        console.log(grid.offsetHeight, grid.offsetWidth)
+          
+        // when the text area is selected replace all spaces with '·'
+        grid.addEventListener("focus", () => {
+          console.log("focus grid")
+          // grid.value = grid.value.replace(/ /g, '·')
+          // overlay.innerHTML = parsePinboard(grid.value)
+        })
+        grid.addEventListener("focusout", () => {
+          // overlay.innerHTML = parsePinboard(grid.value)
+        })
+
+        grid.addEventListener("input", e => {
+
+          // get user's cursor position so we can restore it after the update
+          var sel = getInputSelection(grid);
+
+          // // make sure we always have the same number of lines
+          // let valueArr = [...grid.value.split("\n"), ...Array(nRows).fill(" ".repeat(nColumns))]
+          // valueArr = valueArr.slice(0, nRows)
+
+          // // make sure each line is exactly the right length. add '·' or remove characters
+          // valueArr = valueArr.map((d, i) => {
+          //   // TODO: data is lost
+          //   return (d + " ".repeat(nColumns)).slice(0, nColumns)
+          // })
+
+          // grid.value = valueArr.join("\n")
+          grid.value = cleanseGridValue(grid.value, nRows, nColumns)
+          rolls[pinboard.id] = grid.value
+          overlay.innerHTML = parsePinboard(grid.value)
+          if (e.data === null && e.inputType === "insertLineBreak") {
+            console.log("new line", e, sel)
+            sel.start += nColumns
+            sel.end += nColumns
+          }
+          setInputSelection(grid, sel.start, sel.end);
+        })
+      }
+
+    })
+
+    /*
+     * Convert pinboard to musical notes
+     */
+    function parseMusicalNotes(musicalNotes) {
+
+      const noteToSharpMap = {
+        "C": "C#",
+        "D": "D#",
+        "E": "F",
+        "F": "F#",
+        "G": "G#",
+        "A": "A#",
+        "B": "C",
+      }
+
+      // default palette
+      const noteMap = [
+        ["c", "C"],
+        ["d", "D"],
+        ["e", "E"],
+        ["f", "F"],
+        ["g", "G"],
+        ["a", "A"],
+        ["b", "B"],
+
+        ["1", "C"],
+        ["2", "D"],
+        ["3", "E"],
+        ["4", "F"],
+        ["5", "G"],
+        ["6", "A"],
+        ["7", "B"],
+
+
+        ["A", "A4 C5 E5"],
+        ["B", "B4 D5 F5"],
+        ["C", "C4 E4 G4"],
+        
+        ["$", "440 570"],
+        // ["#", "330 323"],
+        ["£", "400 430"],
+        // ["#", palette.white, palette.lightGrey, palette.lightBlue],
+        // ["@", palette.white],//, "#595160", "#999997"],
+        // ["W", palette.lightYellow],//"#696170", "#999997"],
+        // ["X", palette.red, palette.lightGreen],//, "#797180", "#999997"],
+        // ["N", palette.lightGrey, "#ffe8e4"],
+        // ["E", palette.darkRed, "#f8eae8"], // brick
+        // ["F", "#ffe8e4"],
+        // ["Z", palette.darkYellow, palette.cyan],//"#797180", "#999997"],
+        // ["0", palette.white],//"#494150", "#999997"],
+        // ["%", palette.white],//"#a38c87"],
+        // ["œ", "#a08481", "b58481"],
+        // ["ø", "#918481"],
+        // ["∆", "#9e959e"],
+        // ["◊", "#e8ffe4"],
+        // ["π", "#ffe8e4"],
+        // ["*", "#bebeee"],
+        // ["¬", palette.white],
+        // ["-", "#9e959e"],
+        // ["_", "#9e959e"],
+        // ["=", "#cb9fd6"],
+        // ["≈", "#ffe8e4"],
+        // ["+", palette.white],// "#98a177"],
+        // ["~", "#4272eb"],
+        // ["˚", "#ffe8e4"],
+        // [".", "#faacf7"],
+        // [",", "#faacf7"],
+        // ["‚", "#eaace7"],
+        // ["•", "#b6c3fc"],
+        // ["·", palette.lightBlue, palette.lightGrey, palette.lightPink],// "#cceac7"],
+        // ["'", "#b6e0d2"],
+        // ["\"", "#a3de9e"],
+        // ["`", "#c4e6f2"],
+        // [":", "#de6b24"],
+        // [";", "#844ae0"],
+        // ["|", "#999090"],
+        // ["_", "#999090"],
+        // ["^", "#9e959e"],
+        // [">", "#bda799"],
+        // ["<", "#9194b5"],
+        // ["$", "#427a6a"],
+        // ["§", "MediumSeaGreen"],
+        // ["!", "MediumSeaGreen"],
+        // ["\\", "#9e959e"],
+        // ["/", palette.blueGrey, palette.white],// "#9e959e"],
+        // ["╲", "#9e959e"],
+        // ["[", "MediumSeaGreen"],
+        // ["]", "Aquamarine"],
+        // ["{", "Red"],
+        // ["}", "Violet"],
+        // ["h", "#a9d1ad"],
+        // ["i", "MediumSeaGreen"],
+        // ["j", "MediumSeaGreen"],
+        // ["k", palette.lightGrey],//"#706468"],
+        // ["l", "Lavender"],
+        // ["m", "#3e9c6e"],
+        // ["n", "MediumSeaGreen"],
+        // ["o", "#eba054"],
+        // ["p", "pink"],
+        // ["q", "MediumSeaGreen"],
+        // ["r", "Red"],
+        // ["s", "SeaGreen"],
+        // ["t", "Teal"],
+        // ["u", "BlueViolet"],
+        // ["v", "#ffdfff"],//"Violet"],
+        // ["w", palette.green],//"DarkSeaGreen"],
+        // ["x", palette.white],//"#706664", "#79736a"],
+        // ["y", "Yellow"],
+        // ["z", "#bfbfbf"],
+        // ["H", "#966a3b"],      
+      ]
+
+      const allReplacements = noteMap.map(d => d[0])
+
+      // // check each character once to see if it should be replaced
+      // value_rows = value.split("\n").map(d => {
+      //   return d.split("").map(dd => {
+      //     if (dd == " ") {
+      //       return "·"
+      //     }
+      //     else if (allReplacements.includes(dd)) {
+      //       const replacement = characterColours.find(ddd => ddd[0] == dd)[1]
+      //       return `<span style="color:${replacement};">${dd}</span>`
+      //     } else {
+      //       return `<span style="color:white;">${dd}</span>`
+      //     }
+      //   }).join("")
+      // })
+
+      const value_rows = musicalNotes.split("\n")
+
+      const rendered_rows = []
+      let lastChar = ""
+      for (let i = 0; i < nRows; i++) {
+        const row = value_rows[i]
+        // rendered_row = []
+        let pos = 0
+        let octave = 5;  // reset each row
+
+        while (pos < nColumns) {
+
+          // process character as normal
+          let dd = row[pos]
+          if (!dd) {
+            console.log("not dd", dd)
+            // rendered_rows.push("·")
+          }
+          else if (dd == " " || dd == "#" || dd == "-") {
+            // do nothing
+          } else if (dd == "/") {
+            octave += 1
+          } else if (dd == "\\") {
+            octave -= 1
+          } else if (allReplacements.includes(dd)) {
+            const replacement = noteMap.find(ddd => ddd[0] == dd)
+            let note = replacement[1]
+            let supportsOctaves = false
+
+            if (note.length == 1) {
+              supportsOctaves = true
+            }
+
+            // look ahead for '#'
+            if (row.slice(pos + 1).startsWith("#")) {
+              if (noteToSharpMap[note]) {
+                note = noteToSharpMap[note]
+                dd += "#"  // this is for convinience - now we can do dd.length to know how far to look ahead for '-'
+              } else {
+                console.error(dd + "#" + "is not a valid note (" + note + "# does not exist)")
+              }
+            }
+
+            let length = 1
+            // look ahead for '-' to indicate longer note
+            if (row.slice(pos + dd.length).startsWith("-")) {
+              // get index next non '-' character
+              const lastIndex = row.slice(pos + dd.length).search(/[^\-]/)
+              length = lastIndex
+            }
+
+            if (supportsOctaves) {
+              note = note + octave
+            }
+
+            rendered_rows.push({"note": note, "type": "beat", time: pos, group: i, length: length})
+          } else {
+            // random note
+            rendered_rows.push({"note": ["A5", "B5", "C6", "D6", "E6"][Math.floor(Math.random() * 5)], "type": "beat", time: pos, group: i})
+          }
+          pos++  
+        }
+        // rendered_rows.push(rendered_row)
+      }
+
+      return rendered_rows
+    }
+
+  const gainNode = new Tone.Gain(0.1).toDestination();
+
+  const instruments = {
+    // "roll1": new Tone.PluckSynth().toDestination(),
+    // "roll1": new Tone.PolySynth(Tone.Synth, {oscillator: {
+    //     type: "triangle"
+    //     // type: "sine"
+    //   },}).toDestination(),
+    "roll1": new Tone.PolySynth(Tone.Synth, {
+      oscillator: {
+        type: "square"
+        // type: "square4"
+        // type: "sawtooth"
+        // type: "fmsquare4"
+        // type: "pulse"
+      },
+      // envelope: {
+        // attack: 0
+      // }
+    }).connect(gainNode),
+  }
+
+  // make and start a 440hz sine tone
+  // const osc = new Tone.Oscillator(440, "sine").toDestination().start();
+
+  //attach a click listener to a play button
+  document.querySelector("button")?.addEventListener("click", async () => {
+
+    let data = []
+    const speed = 0.12
+
+    Object.keys(rolls).forEach((key) => {
+      const rollData = parseMusicalNotes(rolls[key])
+      rollData.forEach(d => {
+        d.instrument = instruments[key]
+      })
+      data.push(...rollData)
+    })
+    
+    console.log(data)
+
+    const now = Tone.now();
+
+    data.map((d, i) => {
+
+      // don't play the gaps between 8-row blocks
+      if (d.group%9 == 0 || d.group == nRows - 1) {
+        return
+      }
+
+      let delay = Math.floor(d.group/9) * (nColumns - 4);
+
+      if (d.type === "beat") {
+        // const atTime = d.time * 0.28
+        const atTime = Math.max(d.time + delay, 0) * speed
+
+        setTimeout(() => {
+          console.log(d.note, d.time + delay)
+          const noteElements = document.querySelectorAll(`span[time="${d.time + delay}"]`)
+          noteElements.forEach(el => {
+            el.style.fontWeight = "bold"
+            setTimeout(() => {
+              el.style.fontWeight = "normal"
+            }, 100)
+          })
+          
+        }, atTime * 1000)
+        let note = d.note.split(" ")
+        if (note.length == 1) {
+          note = note[0]
+        }
+
+        let length = "16n"
+        if (d.length == 2) {
+          length = "8n"
+        } else if (d.length == 3) {
+          length = "4n"
+        } else if (d.length == 4) {
+          length = "2n"
+        }
+
+        d.instrument.triggerAttackRelease(note, length, now + atTime);
+      }
+    })
+
+    await Tone.start();
+    console.log("audio is ready");
+  });
+
+
+// play notes as they are typed
+document.addEventListener("keydown", (e) => {
+  const note = e.key
+  switch (note) {
+    case "c":
+    case "1":
+      instruments["roll1"].triggerAttackRelease("C5", "16n");
+      break;
+    case "d":
+    case "2":
+      instruments["roll1"].triggerAttackRelease("D5", "16n");
+      break;
+    case "e":
+    case "3":
+      instruments["roll1"].triggerAttackRelease("E5", "16n");
+      break;
+    case "f":
+    case "4":
+      instruments["roll1"].triggerAttackRelease("F5", "16n");
+      break;
+    case "g":
+    case "5":
+      instruments["roll1"].triggerAttackRelease("G5", "16n");
+      break;
+    case "a":
+    case "6":
+      instruments["roll1"].triggerAttackRelease("A5", "16n");
+      break;
+    case "b":
+    case "7":
+      instruments["roll1"].triggerAttackRelease("B5", "16n");
+      break;
+  }
+})
+
+/////////
+
+
+const test1 = `a a#b/c c#d d#e f f#g g#a a#b/c c#d d#e f f#g g#a a#b`                                
+const test2 = `
+           /1                                                   
+1 2 34 5 6 7                                                    
+ 1#2# 4#5#6#                                                    
+`
+
+const jesu = `
+                                         /e                     
+               /e     g f#g           c d   d c\b   b           
+        b/d c c   d d       d\b     b             a   g         
+    g a g---                    g a                             
+             \e--- \b--- /e---                          f#   
+                                    \\a---  b---  c---  d---    
+\\g---                          e---                                
+`
+
+
+stupidSong = `                                                                
+//                                cd d--                        
+/ d d d e de fd c                                               
+                  bb ba a fd  d                                 
+\ f#                                                            
+\\d   d   d   d   d   d   d   d   d   d   d   d   d   d   d     
+`
+
+sarah = `
+                                                                
+                                                                
+        g---        a---        bbb-        a---                
+       e---        f---        g---g g g g f---                 
+      c---        d---        e---  e f e d---                  
+   \    g-g-e-e-d-c-                                            
+`
+sarahBass = `
+                                                                
+                                                                
+  \\\ c d e   e   c d e-  e---c---f-e d c c                     
+                                                                
+                                         
+`
+
+treasureChest = `                                                               
+    /24676423#      2                                           
+    6#      /1   \\67                                            
+   5#         6#55#                                             
+123#           4#                                               
+                                                                
+`
+
+// composed by Sarah
+amazingSong = `/gg ff ee f  ffgg /gg g   \ffgg /gg g`
+
+</script>

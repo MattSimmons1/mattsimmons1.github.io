@@ -1,0 +1,1282 @@
+
+<style>
+	body {
+		margin: 0;
+		overflow-x: hidden;
+		/*height: 100vh;*/
+		-ms-overflow-style: none;  /* IE and Edge */
+		scrollbar-width: none;  /* Firefox */
+	}
+  body, textarea, .levelEditor {
+    color: #f3f2ea;
+    font-size: 12px;
+    font-family: monospace;
+    text-align: left;
+    line-height: 7px;
+    background: #100f0d;
+		/*background: #1d1b16;*/
+  }
+	body::-webkit-scrollbar {
+		display: none;
+	}
+
+  main {
+		margin: 0;
+		/* padding: 15vh 0 20vh 0; */
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		overflow-x: hidden;
+	}
+
+  .column-container {
+    display: flex;
+    flex-direction: row;
+    gap: 0;
+  }
+
+  .pinboard {
+    position: relative;
+  }
+
+  .sprite {
+    position: absolute;
+    image-rendering: pixelated;
+    top: 0px;
+    left: 0px;
+    z-index: 100;
+  }
+
+  textarea.gridinput, p.gridoverlay {
+      overflow: hidden;
+      resize: none;
+      outline: none;
+      border: none;
+      white-space: pre;
+      /* height: 1000px; */
+      /* width: 1000px; */
+      padding: 0;
+      margin: 0;
+  }
+  textarea.gridinput {
+      color: #0000;
+      caret-color: white;
+      /* caret-shape: block; */
+  }
+  p.gridoverlay, p.mapTile {
+    position: absolute;
+    white-space: pre;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    background: transparent;
+    color: #303133;
+    pointer-events: none;
+  }
+
+  #scene {
+    position: relative;
+  }
+  #scene p {
+    position: absolute;
+    width: 250px;
+    height: 310px;
+    top: 0;
+    left: 0;
+    white-space: pre;
+    color: white;
+  }
+
+  .worldMap {
+    display: grid;
+  }
+  p.mapTile {
+    position: unset;
+    margin: 0;
+  }
+
+</style>
+<script src="simple_game_engine.js"></script>
+<main>
+
+  <!-- <p>SHPOOPEN</p> -->
+  <div class="column-container">
+    <div class="pinboard">
+      <textarea name="input1" class="gridinput" rows="32" cols="32" wrap="hard" spellcheck="false"></textarea>
+      <p class="gridoverlay"></p>
+      <img class="sprite sprite-flipped" src="sprite.png"/>
+    </div>
+    <!-- <div class="pinboard">
+      <textarea name="input2" class="gridinput" rows="20" cols="20" wrap="hard" spellcheck="false"></textarea>
+      <p class="gridoverlay"></p>
+    </div>
+    <div class="pinboard">
+      <textarea name="input3" class="gridinput" rows="20" cols="20" wrap="hard" spellcheck="false"></textarea>
+      <p class="gridoverlay"></p>
+    </div> -->
+  </div>
+  <p style="color: #999; white-space: pre; line-height: 100%;">
+    Use arrow keys to move. 
+    Type to edit the level.
+    You might want to zoom in.
+
+    This game isn't finished.
+    Feel free to copy the code 
+    and make your own levels.
+  </p>
+  <p class="worldMap"></p>
+  <p class="levelEditor"></p>
+</main>
+
+  <script>
+
+    const palette = {
+      white: "#f3f2ea",
+      dimGreen: "#999e97",
+      darkPurple: "#5c4a55",
+      lilac: "#bebeee",
+      darkLilac: "#988b8e",
+      lightGrey: "#b1b6b4",
+      lightBlue: "#b1b6cf",
+      grey: "#a5a6ab",
+      blueGrey: "#d1dae0",
+      darkGrey: "#757575",
+      darkerGrey: "#555555",
+      turquoise: "#a0bab0",
+      darkRed: "#955b69",
+      red: "#ffd3c4",
+      lightYellow: "#faf8c5",
+      blue: "#bcd6f2",
+      lightPink: "#e7bab7",
+      darkYellow: "#b5a271",
+      darkPink: "#ccb2a9",
+      green: "#ace8b6",//"#aaf0b8",
+      lightGreen: "#daffc9",
+      darkGreen: "#62665a",
+      cyan: "#c9ffee",
+    }
+
+    
+
+    function cleanseGridValue(value, nRows, nColumns) {
+      // make sure we always have the same number of lines
+      let valueArr = [...value.split("\n"), ...Array(nRows).fill(" ".repeat(nColumns))]
+      valueArr = valueArr.slice(0, nRows)
+
+      // make sure each line is exactly the right length. add '·' or remove characters
+      valueArr = valueArr.map((d, i) => {
+        // TODO: data is lost
+        return (d + " ".repeat(nColumns)).slice(0, nColumns)
+      })
+
+      return valueArr.join("\n")
+    }
+
+    function getInputSelection(el) {
+    var start = 0, end = 0, normalizedValue, range,
+        textInputRange, len, endRange;
+
+    if (typeof el.selectionStart == "number" && typeof el.selectionEnd == "number") {
+        start = el.selectionStart;
+        end = el.selectionEnd;
+    } else {
+        range = document.selection.createRange();
+
+        if (range && range.parentElement() == el) {
+            len = el.value.length;
+            normalizedValue = el.value.replace(/\r\n/g, "\n");
+
+            // Create a working TextRange that lives only in the input
+            textInputRange = el.createTextRange();
+            textInputRange.moveToBookmark(range.getBookmark());
+
+            // Check if the start and end of the selection are at the very end
+            // of the input, since moveStart/moveEnd doesn't return what we want
+            // in those cases
+            endRange = el.createTextRange();
+            endRange.collapse(false);
+
+            if (textInputRange.compareEndPoints("StartToEnd", endRange) > -1) {
+                start = end = len;
+            } else {
+                start = -textInputRange.moveStart("character", -len);
+                start += normalizedValue.slice(0, start).split("\n").length - 1;
+
+                if (textInputRange.compareEndPoints("EndToEnd", endRange) > -1) {
+                    end = len;
+                } else {
+                    end = -textInputRange.moveEnd("character", -len);
+                    end += normalizedValue.slice(0, end).split("\n").length - 1;
+                }
+            }
+        }
+    }
+
+    return {
+        start: start,
+        end: end
+    };
+  }
+
+    function offsetToRangeCharacterMove(el, offset) {
+        return offset - (el.value.slice(0, offset).split("\r\n").length - 1);
+    }
+
+    function setInputSelection(el, startOffset, endOffset) {
+        if (typeof el.selectionStart == "number" && typeof el.selectionEnd == "number") {
+            el.selectionStart = startOffset;
+            el.selectionEnd = endOffset;
+        } else {
+            var range = el.createTextRange();
+            var startCharMove = offsetToRangeCharacterMove(el, startOffset);
+            range.collapse(true);
+            if (startOffset == endOffset) {
+                range.move("character", startCharMove);
+            } else {
+                range.moveEnd("character", offsetToRangeCharacterMove(el, endOffset));
+                range.moveStart("character", startCharMove);
+            }
+            range.select();
+        }
+    }
+
+    function parsePinboard(value) {
+      // default palette
+      const characterColours = [
+        // in order of brightness
+        // ["●", "#393130", "#999997"],
+        // ˆ˜¯˘∏˙
+        ["#", palette.white, palette.lightGrey, palette.lightBlue],
+        ["@", palette.white],//, "#595160", "#999997"],
+        ["W", palette.lightYellow],//"#696170", "#999997"],
+        ["X", palette.red, palette.lightGreen],//, "#797180", "#999997"],
+        ["N", palette.lightGrey, "#ffe8e4"],
+        ["E", palette.darkRed, "#f8eae8"], // brick
+        ["F", "#ffe8e4"],
+        ["Z", palette.darkYellow, palette.cyan],//"#797180", "#999997"],
+        ["0", palette.white],//"#494150", "#999997"],
+        ["%", palette.white],//"#a38c87"],
+        ["œ", "#a08481", "b58481"],
+        ["ø", "#918481"],
+        ["∆", "#9e959e"],
+        ["◊", "#e8ffe4"],
+        ["π", "#ffe8e4"],
+        ["*", "#bebeee"],
+        ["¬", palette.white],
+        ["-", "#9e959e"],
+        ["_", "#9e959e"],
+        ["=", "#cb9fd6"],
+        ["≈", "#ffe8e4"],
+        ["+", palette.white],// "#98a177"],
+        ["~", "#7993e8", "#accef2", "#96d9c2", "#86d7e3", "#97afe8", "#63a6e6"],
+        ["˜", "#4292eb"],
+        ["˚", "#ffe8e4"],
+        [".", "#faacf7"],
+        [",", "#faacf7"],
+        ["‚", "#eaace7"],
+        ["•", "#b6c3fc"],
+        ["·", palette.lightBlue, palette.lightGrey, palette.lightPink],// "#cceac7"],
+        ["'", "#b6e0d2"],
+        ["\"", "#a3de9e"],
+        ["`", "#c4e6f2"],
+        [":", "#de6b24"],
+        [";", "#844ae0"],
+        ["|", "#999090"],
+        ["_", "#999090"],
+        ["^", "#9e959e"],
+        [">", "#bda799"],
+        ["<", "#9194b5"],
+        ["$", "#427a6a"],
+        ["§", "MediumSeaGreen"],
+        ["!", "MediumSeaGreen"],
+        ["\\", "#9e959e"],
+        ["/", palette.blueGrey, palette.white],// "#9e959e"],
+        ["╲", "#9e959e"],
+        ["[", "MediumSeaGreen"],
+        ["]", "Aquamarine"],
+        ["{", "Red"],
+        ["}", "Violet"],
+        ["a", "Aquamarine"],
+        ["b", "Blue"],
+        ["c", "Cyan"],
+        ["d", "DarkSalmon"],
+        ["e", palette.cyan],//"CadetBlue"],
+        ["f", "PeachPuff"],
+        ["g", "Green"],
+        ["h", "#a9d1ad"],
+        ["i", "MediumSeaGreen"],
+        ["j", "MediumSeaGreen"],
+        ["k", palette.lightGrey],//"#706468"],
+        ["l", "Lavender"],
+        ["m", "#3e9c6e"],
+        ["n", "MediumSeaGreen"],
+        ["o", "#eba054"],
+        ["p", "pink"],
+        ["q", "MediumSeaGreen"],
+        ["r", "Red"],
+        ["s", "SeaGreen"],
+        ["t", "Teal"],
+        ["u", "BlueViolet"],
+        ["v", "#ffdfff"],//"Violet"],
+        ["w", palette.green],//"DarkSeaGreen"],
+        ["x", palette.white],//"#706664", "#79736a"],
+        ["y", "Yellow"],
+        ["z", "#bfbfbf"],
+        ["H", "#966a3b"],      
+      ]
+
+      const allReplacements = characterColours.map(d => d[0])
+
+      // // check each character once to see if it should be replaced
+      // value_rows = value.split("\n").map(d => {
+      //   return d.split("").map(dd => {
+      //     if (dd == " ") {
+      //       return "·"
+      //     }
+      //     else if (allReplacements.includes(dd)) {
+      //       const replacement = characterColours.find(ddd => ddd[0] == dd)[1]
+      //       return `<span style="color:${replacement};">${dd}</span>`
+      //     } else {
+      //       return `<span style="color:white;">${dd}</span>`
+      //     }
+      //   }).join("")
+      // })
+
+      const value_rows = value.split("\n")
+
+      const rendered_rows = []
+      let lastChar = ""
+      for (let i = 0; i < nRows; i++) {
+        const row = value_rows[i]
+        rendered_row = []
+        let pos = 0
+        
+        // handle plain text lines
+        if (row[0] == ">") {
+          rendered_rows.push([`<span style="color:white;">${row}</span>`])
+          continue
+        }
+
+        while (pos < nColumns) {
+
+          // if (pos == 1) {
+            // rendered_row.push(" ")
+          // }
+
+          // handle commands
+          if (row[pos] == "/") {
+            // read ahead for key words          
+
+            let command = "/command"
+            if (row.slice(pos).startsWith(command)) {
+              // row = row.slice(command.length)
+              rendered_row.push("<span style='color:#ffdd99;'>/command</span>")
+              pos += command.length
+              continue
+            } 
+            command = "/bed"
+            if (row.slice(pos).startsWith(command)) {
+              // row = row.slice(command.length)
+              rendered_row.push("<span style='color:#ffdd99;'>/bed</span>")
+              pos += command.length
+              continue
+            } 
+          }
+
+          // process character as normal
+          const dd = row[pos]
+          if (!dd) {
+            console.log("not dd", dd)
+            rendered_row.push("·")
+          }
+          else if (dd == " ") {
+            rendered_row.push("·")
+          } else if (allReplacements.includes(dd)) {
+            const replacement = characterColours.find(ddd => ddd[0] == dd)
+            let colour = replacement[1]
+            // if (dd == lastChar && replacement.length > 2) {
+            if (replacement.length > 2) {
+              colour = replacement[Math.floor(Math.random() * (replacement.length - 1)) + 1]
+              lastChar = ""
+            } else {
+              lastChar = dd
+            }
+            if (dd == "~") {
+              const replacementChar = "~~∿"[Math.floor(Math.random() * 3)]
+              rendered_row.push(`<span style="color:${colour};">${replacementChar}</span>`)
+            } else {
+              rendered_row.push(`<span style="color:${colour};">${dd}</span>`)
+            }
+          } else {
+            rendered_row.push(`<span style="color:white;">${dd}</span>`)
+          }
+          pos++  
+        }
+        rendered_rows.push(rendered_row.join(""))
+      }
+
+      value = rendered_rows.join("\n")
+
+      // convert pinboard value to overlay HTML
+      // value = value.replace(/ /g, '·').replace(/[^·\nf#|]/g, ' ')
+      // .replaceAll('#', '<span style="color: #de6b24;">#</span>')
+      // .replaceAll('|', '<span style="color: #eeaaff;">|</span>')
+
+      // for (let i = 0; i < characterColours.length; i++) {
+        // value = value.replaceAll(characterColours[i][0], `<span style="color: ${characterColours[i][1]};">${characterColours[i][0]}</span>`)
+      // }
+      
+
+      return value
+    }
+
+    const nColumns = 32;
+    const nRows = 32;  // make sure rows don't exceed the element height
+
+    document.addEventListener("DOMContentLoaded", e => {
+
+      const grids = document.querySelectorAll(".gridinput")
+      const pinboards = document.querySelectorAll(".pinboard")
+      console.log(pinboards)
+
+      
+      for (const pinboard of pinboards) {
+        const grid = pinboard.querySelector(".gridinput")
+        const overlay = pinboard.querySelector(".gridoverlay")
+        
+        // initial value
+        grid.value = levels["1,0"]
+        // grid.value = Array(nRows).fill(" ".repeat(nColumns)).join("\n")
+        overlay.innerHTML = parsePinboard(grid.value)
+
+        const playerElement = pinboard.querySelector(".sprite")
+        console.log(grid.offsetHeight, grid.offsetWidth)
+        const onLevelLoad = (event) => { 
+          console.log("load level", event)
+
+
+          let level;
+          if (event.y >= 6) {
+            level = levels["1,0"]
+            // reset world to the first level
+            game.world.level = {x:1, y:0}
+          }
+          else {
+            level = levels[`${event.x},${event.y}`]
+          }
+          if (!level) {
+            console.log("no level", event, "- creating level")
+            // create the level
+            level = levels[`${event.x},${event.y}`] = Array(nRows-1).fill(" ".repeat(nColumns)).join("\n") + "\n" + "######  ".repeat(nColumns)
+          }
+          grid.value = cleanseGridValue(level, nRows, nColumns)
+          overlay.innerHTML = parsePinboard(grid.value)
+          game.resetWorld(grid.value, grid.offsetHeight, grid.offsetWidth)
+        }
+          
+        const game = new Game(playerElement, grid.value, grid.offsetHeight, grid.offsetWidth, onLevelLoad)
+        game.gameLoop()
+
+        // when the text area is selected replace all spaces with '·'
+        grid.addEventListener("focus", () => {
+          console.log("focus grid")
+          // grid.value = grid.value.replace(/ /g, '·')
+          // overlay.innerHTML = parsePinboard(grid.value)
+        })
+        grid.addEventListener("focusout", () => {
+          // overlay.innerHTML = parsePinboard(grid.value)
+        })
+
+        grid.addEventListener("input", e => {
+
+          // get user's cursor position so we can restore it after the update
+          var sel = getInputSelection(grid);
+          grid.value = cleanseGridValue(grid.value, nRows, nColumns)
+          overlay.innerHTML = parsePinboard(grid.value)
+          if (e.data === null && e.inputType === "insertLineBreak") {
+            console.log("new line", e, sel)
+            sel.start += nColumns
+            sel.end += nColumns
+          }
+          setInputSelection(grid, sel.start, sel.end);
+
+          game.resetWorld(grid.value, grid.offsetHeight, grid.offsetWidth)
+        })
+      }
+    })
+
+  const orchard = `     qqttq  
+    ttqqttqt                   
+   ttqttqwqqt                  
+   tqqqwwqqtt                     
+   qqwqqwwwqq                  =
+    ttwHHtww             =    
+       HH          =           
+       HH                       
+       HH                       
+      wHwwwwmww                 
+   wmww#%x#zx0hzwwzww           
+ww ø#%XvW k vx#x#kx·X+wwmwww    
+X/            X/ xk0#/·/Z%www   
++K/0kW              0+x/%·xkwww 
+/øN··X+K#               #/xz->øw
+·Z#+X/>Kx#                 X··+#
+·/···xZ/kN                  xxz·
+/-··/x-%kv    #%#0          Kk·x
+·x/·k·zZX     N/·XWkx%zz#     W-
+    · xøz     ZW#x+/0/x>W#K    #
+   %·/#z    ##/xz-N·/-··N-0N   z
+  -  W      X/z·/+·-·z·/·-ø>   x
+     >     -KW·Zø·->·/··x·+XX   
+   /ø   0k>·#·øz/zX%+·-z·/·/k   
+   +    xZkK-z>z-%XzZXWK/··-N   
+/  xX                øWZW+··kz#0
+   //X                 xxX- kKZW
+      00                 0z/··W/
+ Z    øZKXX              %#z·/·x
+        ø·N>#Zzk+#K/ø    zKø··N/
+    W>·k/xZ#XN0W xxW+    X·0-··x
+   z/·/x        Kx·Z>    Kz·x···`
+
+  const house = `                                
+                                
+                                
+                                
+                                
+                                
+ tttt                           
+twwqwt                          
+wwtqtwt                         
+wtwtwttx+xx                     
+qttqwwt+x++x                    
+  HH x+x+<>+x                   
+  HH |==|=H|=             .zwv*w
+  HH |££|uH|£           wwvwxxwm
+xw/Hwzwwzmwwzwwmwwmwww  x%kz"zz"
+kzxk\\z%kx"%/%x/+%zx%#z w+%x·/%kx
+z//%\\ek#·%z/x%ø%Xx0W%> x%x/%#z#W
+%k·kz/%-/k+·/%z·z%#>   x+x#x/%ex
+·>-\\·x/·>/+ø/x/·WXøx  zk%x·e#z-·
+x·+-k/·%xk%#%e%øX+W>  xz%#%#%#+/
+%/k%>·%#x         v   z###x%##>x
+W%Xzkk#              %##x#xe+/·%
+x         x#X##        ##-/·/+·/
+         #z··#x     x##z%x·x/%/·
+   zz%#z##xX#      xxXZx#k##z##x
+%zx#%#xøx·#X#x    %xkx##%  x#x#x
+·#·x#x#zX·X#%    #z#xXZk        
+,z·xX%X0x##     x%øx#Xz#k       
+x·+//k/x·#      #ø#+/zX%###x#e#x
+z<·Xx//X%      W%+#<z/·e·+%ø#/##
+/·/<<#øX#     x%X#XxZ%/X/x/%x-//
+·/·+//X#%   x#W>+/%-/··/·%·/·x/·`
+
+
+  const cave = `#x%#####%       ####%#####%###xx
+xx##%#####%       ####%#####%###
+      ""''                      
+    " '"'"''        +##+##--    
+  /      [[[].      +++#++#     
+    .· /                     x  
+ /                  \           
+    ///## ##            SSSss  z
+          ++#     $ ::$Sss =    
+    >>            s s s    = ===
+<<<#    s s··                   
+                  $%t%\\\\\     
+   #######        ---%%w%t      
+####### :           gt%*www     
+### ## # #*##       **  '\f t   
+      ***##**.       %t   '  .* 
+  #     # **                    
+                     \\ t/'      
+                     \\\\    *    
+##                   \\\\\\\\\\#===##
+\\==\\##-          j%j j         
+   n n  ##|e         l l + + #  
+ n ~                  =%#= =   w
+ ~    n__/           _ww s_ $wnm
+    n       g        n-n wmwm %n
+#~ n g  w wmnw      w%m iemew   
+n~w~~w~wne e w      m#nme##m w n
+~~n~w#w~e~wew~     e~ s s #####m
+~#~~~~w~weweww     e ~ ~   % #e#
+#e~#~#~~~~~~ewe     ###e##      
+  #~    ##w~we       n h        
+                                `
+                                
+
+const cliff = `                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                      wwwhwwhmww
+        wwmzwwwwzwwhww*wmwmw*whm
+wwwwwmwwwwx%wxmwx%wxhxxwxwwxxwwx
+x%hxhxMmxx%xx%xx%xx%xx%xx%xx%xe 
+%eXz%eXz%eXz%eXz%eXz+X###z%X%%%%
+x#%eXz%x+Xz%eXz%x+Xz%eXz%x+Xz%eX
+zx#  %eXz%x+Xz%eXz%x+Xz%@Xz%x+Xz
+%e%eXz%-·Xz%eXz%x+Xz%eXz%x+Xz%eX
+%eXz%x+/z%eXz%x+X@%@Xz%x+Xz%eXxx
+xxxxx%e/z%x+Xz%eX/%x+Xz%@Xz%x+Xz
+XXXXX#XXM%eXz%x+@z%eXz%x+Xz%eXz%
+X%%·Xz%x+Xz%eXz%x/X//%eXz%x+Xz%e
+Xxx·>%eXz%x+@z%@@z%x+Xz%eXz%x+Xz
+X//x-/ Mx%eXz%x+Xz//Xz%x+Xz%@Xz%
+ x%eXz%x+Xz%eXz%x+Xz%eXz%x+Xz%eX
+  @ @%eXz%x+Xz%eXz@x+Xz%eXz%x+Xz
+   XXxx#    z%x+X@%#Xz%x+Xz%eXz%
+     z%x     Xz%x+Xz%eXz%x+Xz%@@
+#     +  %x    eXzz%x+Xz%eXz%x+X
+%z#      %eX   +Xz%eXz%x+Xz%eXz%
+XXX%eXz%x+Xz%   %x+Xz%eXz%x+Xz%e
+XxXxx%eXz%x+Xz  Xz%x+Xz%eXz%x+Xz`
+
+cliff2 = `                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+      whwmw                     
+w%whmww%wwwhmwhwwww             
+#ø%ø>X/x#%W0zXzxX#/             
+Z%%%0·+/+-#/x>X#/+              
+//>/%//··-%·+XW                 
+/%··/··>%/ø/>x                  
+·/ø·>·/+··-X/                   
+/·%%/-ø··/x0                    
++·//·/+//+-#~~~~~~~~~~~~~~~~~~~~
++//-/·/%>+Xz~~~~~~~~~~~~~~~~~~~~
+··+%·//x·%x~~~~~~~~~~~~~~~~~~~~~
+//·///>·-kX~~~~~~~~~~~~~~~~~~~~~
++··>·ø·+/>0~~~~~~~~~~~~~~~~~~~~~
+·/·ø//+-/+z~~~~~~~~~~~~~~~~~~~~~
+-·+·/kø%·Z~~~~~~~~~~~~~~~~~~~~~~
+%/>·/-/-/X~~~~~~~~~~~~~~~~~~~~~~
+·/-+·/+>+#~~~~~~~~~~~~~~~~~~~~~~
+·-/··%·+#/~~~~~~~~~~~~~~~~~~~~~~
+/·//k·x/0~~~~~~~~~~~~~~~~~~~~~~~
+·/·-+ø·>/~~~~~~~~~~~~~~~~~~~~~~~
+/·-/-xZ/~~~~~~~~~~~~~~~~~~~~~~~~
+·/·//·+#~~~~~~~~~~~~~~~~~~~~~~~~
+/--%··%/~~~~~~~~~~~~~~~~~~~~~~~~`
+
+cave2 = `>·/···>+·+%·Z  #·/>ø/·/+///ø//+·
+·-ø/·%///+·%x  W/+··/·-ø·%-//>+/
++/·/>//··//   #/>%/+-/>·/·····/+
+··/>·-/>+%+   ///··-/·%ø+z%>%>ø/
+//0W         Z>ø+%·v        0>>/
+·%/z       zX··ø>v   #+>%%>  +//
+·/zX   #xZø+·øX>#  +#//-%-·0 /·/
+/·>0    z/#ø#v    #/-/·%/Z#  >·ø
+-/øW    -v      />/·>ø·/-W  %·/-
+ø·/%/z+     ø/ø/>/-/·%+·%%  #··/
+·--%·/%     #+·/····/-ø>v  #X-+·
+·//>/·Z+  %##/·%·>/>#·øv   /%-/#
+/·/Xz#/#+#/ v            %Xz/+# 
+/+%v #%>+           x+ø+X#-/+X  
++%ø   ##           >/%·/·/ø+#   
+#      v          ø+·/>//+/+#   
+                    -/%/·/+#  /#
++0                   /%/·>/  #-+
+/x               #z  /-/#Z   //+
+/X∆    ∆          W   >vz  # /- 
+///∆   #         /#Z      ø/ />/
+ø··/0X#·#   ∆    0/<-/ø%/--/  %/
+··-ø/-··X  ∆#    #%·<·///·//- //
+/>/ø/·-//% ##  øø+/·%øz+>·//+  /
+···/x%//ø%-·ø·/>/ø+/X-Z/ //>/  >
+ø··/   #/%%ø·//·/·+/      +/  >·
+·+>x #  #+Zxzø%Xz/+  %       %·-
+·/+Z #X        #v>  -%/      ø·/
+///ø v %/+-/#>     zX·//>z#0>/+ø
+%·//    X+ø+>-//#Z>ø%//>-%/·/ø /
+/>/%#      x/%///%ø++%/%ø//+/+·/
+···>%/#       z///·->/+ø>->//%··`
+
+const airPocket = `·//+>·/#~~~~~~~~~~~~~~~~~~~~~~~~
+·/>/·//ø~~~~~~~~~~~~~~~~~~~~~~~~
+··ø·//k#~~~~~~~~~~~~~~~~~~~~~~~~
+·ø·+/·X+~~~~~~~~~~~~~~~~~~~~~~~~
++ ·%/·+·W~~~~~~~~~~~~~~~~~~~~~~~
+//·/-///%~~~~~~~~~~~~~~~~~~~~~~~
+/····%/X/~~~~~~~~~~~~~~~~~~~~~~~
+·>·/··z>~~~~~~~~~~~~~~~~~~~~~~~~
+·%+-/xX#~~~~~~~~~~~~~~~~~~~~~~~~
+·+·>//%~~~~~~~~~~~~~~~~~~~~~~~~~
+/·/·/>/>~~~~~~~~~~~~~~~~~~~~~~~~
+///%//%X~~~~~~~~~~~~~~~~~~~~~~~~
+·+%/·/%%#~~~~~~~~~~~~~~~~~~~~~~~
+##z>ø·>x#~~~~~~~~~~~~~~~~~~~~~~~                      
+   Z+·ø·X#~~~~~~~~~~~~~~~~~~~~~~                      
+   x/#·øxZ~~~~~~~~~~~~~~~~~~~~~~
+%   # v/+/#~~~~~~~~~~~~~~~~~~~~~
+/X     v··/#~~~~~~~~~~~~~~~~~~~~
+/x#     //+#~~~~~~~~~~~~~~~~~~~~
+/·>     #>-/ø~~~~~~~~~~~~~~~~~~~
+///z    ø/ø·/#~~~~~~~~~~~~~~~~~~
++/ø>    +/··%~~~~~~~~~~~~~~~~~~~
+·%/%#~~/··/-+~~~~~~~~~~~~~~~~~~~
+/·/+/X~·%>/+~~~~~~~~~~~~~~~~~~~~
+·/·/-ø~~+->~~-xx~~~~~~~~~~~~~~~~
+··/+··0~~~~~x#//W~~~~~~~~~~~~~~~
+-//+//·>XZzWx··%X~~A~~~~~#~~~~~~
+/ø·>·//++v#/ø0x+/>z#~A~~zX>-#A~A
+·/·-ø//v       v/ø+xzZXAW/·W·ZW#
+#vXø#v            X%/ø-/·+/···>·
+                    #X>-·/>/ø>%+
+                     ZW/+>/·/··/`
+
+const depths2 = `·>·+++/>#    -WZzø>·-·>/·+ø·>-··
+>/+·-+·/Z       >-·/·ø/·-/-··/·/
+ ··>+·//-        #+/-·/·>-/+·/··
+·>//>-···x         #/>·+/···/-·/
+ -··/>>/·-        x/·/·>->/·-+··
+/  > /--//          v+>·>·-/>>·-
++/-·/·/·/-            Z+·/>/>+>/
+··  -  //>/           W+/··//-/·
+--·· ·//-+W            ø#//·/--·
+·>/· ·-+··/            vzZ/+/·+·
++··   />·Z              #øW////-
+     ··X/              #z/··>/>>
+      /                 /X>/x/>·
+##                            X>
+/Xz                       
+ø-#                       
++/·X                       
+/··#                       
+-/>Z                       
+·/>W                       #z#XW
+//·z                    =  zxZz/
++·Z                          /xW
+//>x               =            
+//XzzZ#z                        
++/·-·X>z0W#Xxz              
+-·//··>/>//-                
+/·/+>·///k/                  
+/>/·-·/··                    
+··/-///>                     
+-/->/·/  //                  
+ø··/>>/ +/                    
+/+·+·//+/                       `
+
+const depths = ` x+/+Xx##             z#-/x / + 
+x/-/x## +              Z#+/+ /  
+·x/X##                   #Zx/ / 
+ZW##                     # zz/· 
+x###                        #xX/
+-# #                        # zx
+%                             zX
+                              x+
+                              Zx
+                              #<
+x#                            xx
+/                               
+/                               
+x                               
+#                               
+#                               
+#                               
+#z                              
+#x                              
+##                            zW
+#x                       =    #x
+x#                  =    #    xe
+/z              =        #    ##
+Xx                            #x
+/z  z       =                 ø 
+XX Z#z                 #       #
+/z z#xzZxz#WzøzøzZzW#  #####  ø 
+x<ZX#X####+##X#xW#W#@  #####z###
+ ///+/#;#/#####W<x###########% 
+   /</##/##/##<##xX#W#######ø
+ ·/ x#/#/#//###/</##/+/</+/#/# 
+   /./<·X##X#ø ######/ /####ø###`
+
+
+square = `                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+        eeeeeeeeeeeeeeee        
+        eeeeeeeeeeeeeeee        
+        eeeeeeeeeeeeeeee        
+        eeeeeeeeeeeeeeee        
+        eeeeeeeeeeeeeeee        
+        eeeeeeeeeeeeeeee        
+        eeeeeeeeeeeeeeee        
+        eeeeeeeeeeeeeeee        
+        eeeeeeeeeeeeeeee        
+        eeeeeeeeeeeeeeee        
+        eeeeeeeeeeeeeeee        
+        eeeeeeeeeeeeeeee        
+        eeeeeeeeeeeeeeee        
+        eeeeeeeeeeeeeeee        
+        eeeeeeeeeeeeeeee        
+        eeeeeeeeeeeeeeee        
+        eeeeeeeeeeeeeeee        
+                                
+                                
+                                
+                           
+                             
+                           
+################################`
+
+
+const crazy = `
+ejqfoijef;kjnebf;oviehbvlkjer;uh
+kwjbpouhdvpioshfbdfvourpkajgblse
+jfosiehfjhlsvflkudhpoifuhrlekjbg
+sieuhrgpshjkjblakuhiwueypiuowhfh
+zjdpoeiruoil;lkjhdsfbvcbnmznguij
+benjkdiueihbfhpikjfnjesipok;jln,
+sjipojilrhjfpnrjs;kfsjorjflih;ih
+;ib;liesjfsqelirjfs;lkjbchsjnbzx
+pwoieuwjmfngbhjvuiocl,mwnebhuifo
+lkcmnxbvgehyuidkjbvfgfrewsadcxza
+ertyuioiujhbvcfiokmklpokjhbvcswe
+tyjnbvcdsdfghjijhbvfrtyuijhbvgyu
+eiuhfeoiewuhfriweuhfboiweruhfkew
+bjhebvieugviewugviebvwoiehfiuweh
+iuerflhbvnb vleieuhgiuwehfiuehfu
+evkhbevehvlekhvlwekhlewiuvhlewhv
+wlkvhelkhelvuehlvkuhebercuhiewuh
+lekjbfenbfieuhrfpoerhljehvceiurl
+uitbnbmxmnbspwurhfieiourgjrebfvh
+ugewhveurhwoiejfhbfhjoijhhdbiufo
+hfwehviuehwfoierfveliuhrfpiuerhk
+hrfljhkebfliuehflkjheflkuhelkjhe
+`
+
+scaryDoor = ` - /+X                z#-/x / + 
+ /- x-x+               Z#+/+ /  
+ x/X xW WZz              #Zx/ / 
++  //WX                  z/ z / 
+  X->        zZXxx      z     xX
+ /-z        zX+0        # /    x
+% >                   ZX      x0
+ k                   ##        Z
+x-/        X+>      Xx/        #
+ W>       z- W/    z//x        0
+x /-      0/x-     zx//x       %
+/  X+    zx·/#     Z           >
+    x    W->+x    F-           z
+        z0/#z-    x/           X
+        XX v 0Xx  xX-          x
+        W-    XW               #
+       x/xX   /x              Wx
+          v    WWXxWZz        Z 
+                #z0v         #> 
+#xzZ#zW                   i-x-x 
+#ZxX>z                    RRRRRR
+x#/-/                     RRRRRR
+/z                 zZ#          
+Xx                              
+/z  z                           
+XX Z#z                  iFFFFFFF
+/z z#xzZxz#WzøzøzZzW#xx#£FFFFFFF
+x/ X#X####+##X#xW#W#@ZXz#F##z###
+   /+/#;#/#####W<x###########   
+   /</##/##/##<##xX#W#######    
+  Wx#/#/#//###/</##/+/          
+z#z/./<·X##X#ø ####             `
+
+
+crossCave = ` />/W#%             X    #/%>-
+  x0##x>            W       Z>/%
+x>  0X- -    00    /X        X+/
+    %x-      #X-+              W
+    X X         -X0           /#
+     ##+--   >   >%-         W>W
+x+/     X//X X x X#%#       W%%W
+   >      0 %    /0%x       />#%
+             X    -Wv     x%>-- 
+            +  -   #      Wx>0  
+x%    W%-+     0#/ v     -ø%W   
+%X>>WW  X>       +      W-0Xx   
+ WW#X>/+ %0/  /   >   >Z+X/X   W
+%/X#X/   +/0  %        z%>+-   /
+/0x>        0         z>X     -+
+#WX   + + /X +        #+Z   X#+/
+%xW        x+ /       x%0    >W%
+0/xx         - /       0x      x
+ >#/% +    W W0         +W     0
++-xx+X X-> /#X   #       >x/  W+
+    #    / % #      X-    X   >/
+      0    %-  /    zx+     -Xø> 
+  >%+  W>xxX        W0/X      #x 
+                     0-W#     Xz  
+                 X>Zzx·/x      0 
+               >#0+/x/ø#       @ 
+              0Xx#%x·>·-#X  X0#x  
+               0Z/·>W-/%/# %WXzZ  
+%>#+>0%-%-0>%W%X+/-·    W  #0x/·
+#>/%->-+/##--X 0      - X  ZW0·/
+xW-      W              z  X+>/#
+0                       #  0/··>`
+
+const bend = `··/·+/-xX   W+</vv++-·/······+··
+/·····Zv    x0     Z/z·x·/·/···/
+·/·+x/-/N   v     øz·ø-/·+··/···
+·%/-··+-xX      ZZ-N-·-·>·-···k·
+/··#>-/+øZ     ·XW-/·/··-/·/·-··
+·+-/-x·>-    z·N··-·%z/k·+·z··>·
+··k>·kx     #/0//-%-z%%Xz·+/k··/
+-ø-x+    ·>-/x#z/XZx#ø+z+/>···x·
+ø/+N#    /XZ+/zWz   v  v#xN·/···
+ xz/W   zø·#%-W         v 0+ x··
+     X   vz%v      x#z     z%·/·
+                Kø#xW#    z->· ·
+#%>XzZZ        +/+ø0ZZ+0    /x·K
+-//+W-W      /%Nz/x>zx+%z   /z·z
+·x+/·Nk#x  z·+·/+-·/·/z%W   z//·
+·/··/-·//0KXz-Z>··#x/W //+  v+zZ
+··+-·//··/>·/·x····/·+/·xz>     
+··/·ø··%··/·+·//·····-·#·/    +z
++/··/ -/··+··X···#/·-/xzzx   #·ø
+N···/·#·ø//z>x··+··>·//kKv   N/·
+·+/WXz%-W    +#Zx·%/%/-/v   Zx·/
+/··X-+Z         x/#%        x/··
+K ø%W            4Wv       ·W/-·
+%k+z              v       /0zXz·
+N/·x    ·W>NZ·#        ZN+x+/···
+-ø+/   X-Nk%-K/XKz#zX#/xk-··x·Z· 
+z+/#     øk%·0x-·%kk///k#Z/z····    
+·-/ZN#   xxX/k-·+øz·z··/+···-···           
+/·>z/Z     //0+øz+·x·--z··/·+···        
+··x·-·#       %Z#Z·+·/0·-·x···k·     
+kX··k·z           Xx-···ø/··-···   
+·0··>·xK>           Kz/x-···>···`
+
+const slide = `              K  z· 0>%Z   #+   
+                Z   zzX Z  zW  X
+           - /      N W·   #x#Z
+          /        / +Zk      ZK
+                  + øN       #- 
+      /       Wk ·ø+W        >+x
+                 · /       /#·k 
+         ·    - k /       ZKxx  
+    -            0#        X%KW  
+             K · #        z+x/  
+      /       K X·       #/x ·kX
+              x %               
+   /         / k                
+  >        / W #       +øxz#Zz/+ 
+       - zz  Z·       >W·/#ø · X
+ ø       ·k x%·      #NZ ·xZ  · 
+       ·    ·     zZ·X 0    ·  
+        X  ZX     #X%  %/K ø  ·/
+         ·  %    øX/ k Kk     kx
+                 /%+ X>   x   # 
+0#              %-k Z     /- >  
+kXWZx          %·     /    x·K  
++-/·#Xøz       Zzz/  ·0     z · 
+·XZ·Z·0      øXXø N      z%     
+/·-·/-#     Z//W -  ·      X%  Z
+z··0ø·W     /·· z ø#K    /   /  
+·-øxzk     zXk /W   / ø >       
+-+Kx>     ·x>  /  k   //      / 
+/+/k      z- X-X     > -        
+ø>0X      % xN /x    /     >    
+-#ø      Z/-x  x#x x    W  Z    
+x       #Zk             +       `
+
+
+const fall = `·//·+#                          
+·-·>-/·+X0                      
+··>·+//·/#                      
+·%ø/·+·+ø                       
+·/·-ø-//·#                      
+··-··/ ·/%                      
+    /·-/··                      
+   /- /ø/·                      
+%ø+ ø·>·/                       
+/··/ øv v                       
+·%///                           
+··-ø+·#/                        
+·%·/ø+Z                         
+/·/·-xz                         
+····>->                         
+-+x/z+#                         
++·+ %>#                         
+-·Z#  v                         
+-·/+#   A                       
+·//·/+A A                       
+··->·//>#                       
+////%->+·>xz                   -
+-/-ø+-/ø-/xZX             /%-//ø
+%>-%+·%>-·ø%#      /ø/%·ø-ø·/-%-
+/ø·-/-/%ø>-/ #  #     >··  /··->
+//··%//>/-·#x# ZX  /   /···%%/·-
+·%>··-·/·+·+z# z>z#///  / / /%·>
+·+·/ø·/·/>·//Z 0X#x/·//·   >- ··
+/···//%//··/X# Ze/·ø//·/%··  -  
+ >/%/··ø/·-·+X xZ>·/+/-·-·%%/  ·
+/+·+>/··-/-·%0 Xe->->/·-//·/ø/> 
+-/ %·>+>+ø+ø·# #X·øø·/···/%/ø-··`
+
+const cavity = `-%>·>·ø·-+>/#X #·ø+//øø/ø/·/-+/·
+/%-+%%ø-/·ø·/# #%>/··//··>·->·>>
+/+-+·/øøø>//+Z #ø//···/+>··+/·+·
+////+·%0v##·%X x·/ø··ø++·ø/+//%/
+···-%ø-#  %+/# z/·//%/>·ø+···ø--
+/·/X//xz#   #X #>//··/·x#%0·////
+·+>#0x/x/·//#x 0ø/·>-/·#   %//+%
++/>   v#/ø>/z# z/·/·-/X#  #///ø>
+·>-X    +·/·Xx z/%·e+/+>#  >%//%
+· x++   v#/%øx #xx/·-··%  0/+·%·
+%/ />    +z//0 X/ø·+%·X#  #+ø-/·
+·-/>xA   z+·/# ø+·%··+ø0  #·/-/-
+··/x-x   Z·>·X xX·>/->-#  Xz/·>·
+//%+·0Ax# +%/z #/·%·øøZz  #·/·-+
+/--/z #z//··/Z xø>·+/-+#   %-+-/
++%-/>··/-·/-X+ #+%ø/··/z  #//>/·
+/-·%·>/>/+/-># z%øø>%z+   -//·/-
+··//z0# #--##x Z//·/z     #-+--/
+/%-/+   v    z #X·ø>#      >z%ø-
+· />             ##/0   #z#//··%
+%-/0Z#>-#z         #  X0%·#0%-//
+%/·+++>-xz#z       v  ##0# #/>·+
+·%·-%++//+>/#0           v >+·//
+%+·//··ø/%+ø·-##-          #///ø
+··/-//%/>-·øe//>%##      %%/·-/-
+·+·-/+/-/-//->·+·/>#  z%>//-øø·-
+/··%/+/··%·//·/··++>ø #·ø//··%/>
+··ø///-ø//ø//·>ø·/·/# +%+-·/·%/-
+·>·>%//-+>ø+>ø·ø ··/% 0·/>//··-·
+···+>···//···/+/+·/+# A//>·->>%·
+/-//%·ø//+··ø/+///+/# #·/·>%··/+
+·/%>··-·%/-/·///ø·>#  +·/ø/ø+·/·`
+
+const abyss = `·%>·X#·#·+·+x#ZX0#x   #XZ+zx··/·
+·//·/+Z   # · #0•      ·    v      
+·//·Z#  ··    v    ·   ·       ·
+ %ø/·0·+ø ·                *    
+   - X ·. · ·.         ·      
+ ·  *       ·      ·      · · • 
+        ·        ·      ·   
+  * ·  ·   ·       ·    *        
+     ·· ·         ·       ·· *  
+                       ·    ··   
+     ·*   ·  ·     ·  *   ·     
+ °  ·       .           ·  ·   ·
+         *      ·      .        
+  ·   ·                     *  · 
+   ·  ·             ·   · ·     
+         ·             ·        
+                      *  ·   ·  
+ .   *·                     ·   
+   ·                      ··    
+                                
+                        ·  ·  . 
+ · ·                    ·       
+                           ·    
+                                
+   ·                           *
+                                
+  .                             
+                                
+                                
+                                
+                                
+                                `
+
+const glitch = `                                
+                                
+                                                                                                                          
+-# #             ●●●●●●●●●●     
+%              ●●●●●●●●         
+●             ●●●●●●●●●●●       
+                              Zx
+▆╲╲╲╲╲╲╲╲╲╲╲╱╱╱╱╱╱╱╱╱╱╱         
+╲╲╲╲╲╲╲╲╲╲╲╲╱╱╱╱╱╱╱╱╱           
+╱╱╱╱╱╱╱╱╱╱╱╱╲╲╲╲╲╲╲╲╲  ◊◊◊◊◊◊   
+╱╱╱╱╱╱╱╱╱╱╱╲╲╲╲╲╲╲╲╲╲╲          
+╲╲╲╲╲╲╲╲╲╲╲╱╱╱╱╱╱╱╱╱╱╱          
+╲╲╲╲╲╲╲╲╲╲╲╲╱╱╱╱╱╱╱╱╱           
+╱╱╱╱╱╱╱╱╱╱╱╱╲╲╲╲╲╲╲╲╲▅▄▃▂▁ ▁▂▃▄▅
+  ▆▅▄▃▂▁ ▁▂▃▄▅▆▇▆▅▄▃▂▁ ▁▂▃▄▅▆▇▆▅
+         FFEEFFEFFEEEFFEEFFEEF  
+EFE401  -  UNAUTHORIZED         
+401  -  UNAUTHORIZED            
+401  -  UNAUTHORIZED     
+401  -  UNAUTHORIZED     
+
+401  -  UNAUTHORIZED           
+401  -  UNAUTHORIZEDEFFEEFEFFEEF
+▆▅▄▃▂▁ ▁▂▃▄▅▆▇▆▅▄▃▂▁ ▁▂▃▄▅▆▇▆▅▄▃
+EFFFEEFFEEF                     
+EFEFFEFFEEFFFEFEFFE▆▅▄▃▂▁ ▁▂▃▄▅▆`
+
+const temple1 = `z# 
+x                               
+X                               
+#                               
+W        <                      
+·#                              
+/0                              
+·#    >                         
++0                              
+kW                              
+·Z       <                
+/>X                          
+·/#                          
+·+x   >                      
+//Z                          
+·>0       zzzzzzzzz           
+/+W      z=========             
++X    z   M                     
+z#    #   =       ==            
+#Xx  #zz  =       W         zzzz
+RRRRRZ    =   .           zz====
+RRRRR     = h π d       zz==ΓLΓL
+         zzzzzzzzzMzzzzz==ΓL====
+           FFFFFFFFFFF==ΓL==zX##
+           EEEEEEEEEEEΓL==X##===
+zzzzzzz               == W#W    
+FFFFFFF==                MFM    
+#FF#F##FF==              W#W    
+#ZW#/0ZW#FF==            MMM    
+Wx/+-/0Xk#ZFF==          W#W    
+zX··/->·X/xXzFF==        MMM    
+·/·/·-//·x/·kW#FF==      W#W    `
+
+
+const bridge = `                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
+================================
+ΓLΓLΓLΓLΓLΓLΓLΓLΓLΓLΓLΓLΓLΓLΓLΓL
+================================
+################################
+================================
+   WMWMW     WMWMW     WMWMW    
+    W#W       W#W       W#W     
+    MMM       MMM       MMM     
+    W#W       W#W       W#W     
+    MMM       MMM       MMM     
+    W#W       W#W       W#W     
+    MMM       MMM       MMM     `
+
+
+const skele = `            
+            
+            
+            
+            
+                 --¬            
+                {ø.ø}           
+                  =             
+                  |             
+                *-*-**          
+               / EE33|          
+               * EE33*          
+              /   |  |          
+             *¬  >E3<*¬          
+             J]  ;--;77         
+                 |  |         
+                 *  *           
+                 |  |           
+                =* =*
+                
+                
+                
+  
+
+  
+
+  
+
+  
+                
+============        ========`
+
+
+const levels = {
+  "0,0": orchard, "1,0": house, "2,0": cliff, "3,0": cliff2,
+  "0,1": crossCave, "1,1": bend, "2,1": cave2, "3,1": airPocket,
+  "0,2": slide, "1,2": depths2, "2,2": scaryDoor, "3,2": temple1, "4,2": bridge, "5,2": skele,
+  "1,3": fall,
+  "1,4": cavity,
+  "1,5": abyss,
+}
+
+
+// draw world map
+
+// const worldMap = document.querySelector(".worldMap")
+// worldMap.style.gridTemplateColumns = "repeat(3, 1fr)"
+// worldMap.style.gridTemplateRows = "repeat(3, 1fr)"
+
+// Object.keys(levels).forEach(d => {
+//   const mapTile = document.createElement("p")
+//   mapTile.innerHTML = parsePinboard(cleanseGridValue(levels[d]))
+
+//   mapTile.setAttribute("class", "mapTile")
+
+//   const [column, row] = d.split(",")
+
+//   mapTile.style.gridColumn = parseInt(column) + 1
+//   mapTile.style.gridRow = parseInt(row) + 1
+//   worldMap.appendChild(mapTile)
+// })
+
+
+// level creator
+const levelEditor = document.querySelector(".levelEditor")
+const charPalette = "%ø>+-////···"  // low density underground texture
+// const charPalette = "#NW%ø0XXKxxkZZzz>+-////···"  // underground texture
+
+// for (let i = 0; i < nRows; i++) {
+//   for (let j = 0; j < nColumns; j++) {
+//     const element = document.createElement("span")
+
+//     element.innerText = charPalette[Math.floor(Math.random() * charPalette.length)]
+
+//     element.addEventListener("mouseover", e => {
+//       element.innerHTML = "&nbsp;"
+//     })
+
+//     levelEditor.appendChild(element)
+//   }
+//   const newLine = document.createElement("span")
+//   newLine.innerText = "\n"
+//   levelEditor.appendChild(newLine)
+// }
+
+
+</script>
