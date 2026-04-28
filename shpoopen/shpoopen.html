@@ -1,0 +1,521 @@
+
+<style>
+	body {
+		margin: 0;
+		overflow-x: hidden;
+		/*height: 100vh;*/
+		-ms-overflow-style: none;  /* IE and Edge */
+		scrollbar-width: none;  /* Firefox */
+	}
+  body, textarea, .levelEditor {
+    color: #f3f2ea;
+    font-size: 12px;
+    font-family: monospace;
+    text-align: left;
+    line-height: 7px;
+    background: #100f0d;
+		/*background: #1d1b16;*/
+  }
+	body::-webkit-scrollbar {
+		display: none;
+	}
+
+  main {
+		margin: 0;
+		/* padding: 15vh 0 20vh 0; */
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		overflow-x: hidden;
+	}
+
+  .column-container {
+    display: flex;
+    flex-direction: row;
+    gap: 0;
+  }
+
+  .pinboard {
+    position: relative;
+  }
+
+  .sprite {
+    position: absolute;
+    image-rendering: pixelated;
+    top: 0px;
+    left: 0px;
+    z-index: 100;
+  }
+
+  textarea.gridinput, p.gridoverlay {
+      overflow: hidden;
+      resize: none;
+      outline: none;
+      border: none;
+      white-space: pre;
+      /* height: 1000px; */
+      /* width: 1000px; */
+      padding: 0;
+      margin: 0;
+  }
+  textarea.gridinput {
+      color: #0000;
+      caret-color: white;
+      /* caret-shape: block; */
+  }
+  p.gridoverlay, p.mapTile {
+    position: absolute;
+    white-space: pre;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    background: transparent;
+    color: #303133;
+    pointer-events: none;
+  }
+
+  #scene {
+    position: relative;
+  }
+  #scene p {
+    position: absolute;
+    width: 250px;
+    height: 310px;
+    top: 0;
+    left: 0;
+    white-space: pre;
+    color: white;
+  }
+
+  .worldMap {
+    display: grid;
+  }
+  p.mapTile {
+    position: unset;
+    margin: 0;
+  }
+
+</style>
+<main>
+
+  <p>SHPOOPEN</p>
+  <div class="column-container">
+    <div class="pinboard">
+      <textarea name="input1" class="gridinput" rows="32" cols="32" wrap="hard" spellcheck="false"></textarea>
+      <p class="gridoverlay"></p>
+    </div>
+    <!-- <div class="pinboard">
+      <textarea name="input2" class="gridinput" rows="20" cols="20" wrap="hard" spellcheck="false"></textarea>
+      <p class="gridoverlay"></p>
+    </div>
+    <div class="pinboard">
+      <textarea name="input3" class="gridinput" rows="20" cols="20" wrap="hard" spellcheck="false"></textarea>
+      <p class="gridoverlay"></p>
+    </div> -->
+  </div>
+  <p class="levelEditor"></p>
+
+</main>
+
+  <script>
+
+    const palette = {
+      white: "#f3f2ea",
+      dimGreen: "#999e97",
+      darkPurple: "#5c4a55",
+      lilac: "#bebeee",
+      darkLilac: "#988b8e",
+      lightGrey: "#b1b6b4",
+      lightBlue: "#b1b6cf",
+      grey: "#a5a6ab",
+      blueGrey: "#d1dae0",
+      darkGrey: "#757575",
+      darkerGrey: "#555555",
+      turquoise: "#a0bab0",
+      darkRed: "#955b69",
+      red: "#ffd3c4",
+      lightYellow: "#faf8c5",
+      blue: "#bcd6f2",
+      lightPink: "#e7bab7",
+      darkYellow: "#b5a271",
+      darkPink: "#ccb2a9",
+      green: "#ace8b6",//"#aaf0b8",
+      lightGreen: "#daffc9",
+      darkGreen: "#62665a",
+      cyan: "#c9ffee",
+    }
+
+    function cleanseGridValue(value, nRows, nColumns) {
+      // make sure we always have the same number of lines
+      let valueArr = [...value.split("\n"), ...Array(nRows).fill(" ".repeat(nColumns))]
+      valueArr = valueArr.slice(0, nRows)
+
+      // make sure each line is exactly the right length. add '·' or remove characters
+      valueArr = valueArr.map((d, i) => {
+        // TODO: data is lost
+        return (d + " ".repeat(nColumns)).slice(0, nColumns)
+      })
+
+      return valueArr.join("\n")
+    }
+
+    function getInputSelection(el) {
+    var start = 0, end = 0, normalizedValue, range,
+        textInputRange, len, endRange;
+
+    if (typeof el.selectionStart == "number" && typeof el.selectionEnd == "number") {
+        start = el.selectionStart;
+        end = el.selectionEnd;
+    } else {
+        range = document.selection.createRange();
+
+        if (range && range.parentElement() == el) {
+            len = el.value.length;
+            normalizedValue = el.value.replace(/\r\n/g, "\n");
+
+            // Create a working TextRange that lives only in the input
+            textInputRange = el.createTextRange();
+            textInputRange.moveToBookmark(range.getBookmark());
+
+            // Check if the start and end of the selection are at the very end
+            // of the input, since moveStart/moveEnd doesn't return what we want
+            // in those cases
+            endRange = el.createTextRange();
+            endRange.collapse(false);
+
+            if (textInputRange.compareEndPoints("StartToEnd", endRange) > -1) {
+                start = end = len;
+            } else {
+                start = -textInputRange.moveStart("character", -len);
+                start += normalizedValue.slice(0, start).split("\n").length - 1;
+
+                if (textInputRange.compareEndPoints("EndToEnd", endRange) > -1) {
+                    end = len;
+                } else {
+                    end = -textInputRange.moveEnd("character", -len);
+                    end += normalizedValue.slice(0, end).split("\n").length - 1;
+                }
+            }
+        }
+    }
+
+    return {
+        start: start,
+        end: end
+    };
+  }
+
+    function offsetToRangeCharacterMove(el, offset) {
+        return offset - (el.value.slice(0, offset).split("\r\n").length - 1);
+    }
+
+    function setInputSelection(el, startOffset, endOffset) {
+        if (typeof el.selectionStart == "number" && typeof el.selectionEnd == "number") {
+            el.selectionStart = startOffset;
+            el.selectionEnd = endOffset;
+        } else {
+            var range = el.createTextRange();
+            var startCharMove = offsetToRangeCharacterMove(el, startOffset);
+            range.collapse(true);
+            if (startOffset == endOffset) {
+                range.move("character", startCharMove);
+            } else {
+                range.moveEnd("character", offsetToRangeCharacterMove(el, endOffset));
+                range.moveStart("character", startCharMove);
+            }
+            range.select();
+        }
+    }
+
+    function parsePinboard(value) {
+      // default palette
+      const characterColours = [
+        // in order of brightness
+        // ["●", "#393130", "#999997"],
+        ["#", palette.white, palette.lightGrey, palette.lightBlue],
+        ["@", palette.white],//, "#595160", "#999997"],
+        ["W", palette.lightYellow],//"#696170", "#999997"],
+        ["X", palette.red, palette.lightGreen],//, "#797180", "#999997"],
+        ["N", palette.lightGrey, "#ffe8e4"],
+        ["E", palette.darkRed, "#f8eae8"], // brick
+        ["F", "#ffe8e4"],
+        ["Z", palette.darkYellow, palette.cyan],//"#797180", "#999997"],
+        ["0", palette.white],//"#494150", "#999997"],
+        ["%", palette.white],//"#a38c87"],
+        ["œ", "#a08481", "b58481"],
+        ["ø", "#918481"],
+        ["∆", "#9e959e"],
+        ["◊", "#e8ffe4"],
+        ["π", "#ffe8e4"],
+        ["*", "#bebeee"],
+        ["¬", palette.white],
+        ["-", "#9e959e"],
+        ["_", "#9e959e"],
+        ["=", "#cb9fd6"],
+        ["≈", "#ffe8e4"],
+        ["+", palette.white],// "#98a177"],
+        ["~", "#4272eb"],
+        ["˚", "#ffe8e4"],
+        [".", "#faacf7"],
+        [",", "#faacf7"],
+        ["‚", "#eaace7"],
+        ["•", "#b6c3fc"],
+        ["·", palette.lightBlue, palette.lightGrey, palette.lightPink],// "#cceac7"],
+        ["'", "#b6e0d2"],
+        ["\"", "#a3de9e"],
+        ["`", "#c4e6f2"],
+        [":", "#de6b24"],
+        [";", "#844ae0"],
+        ["|", "#999090"],
+        ["_", "#999090"],
+        ["^", "#9e959e"],
+        [">", "#bda799"],
+        ["<", "#9194b5"],
+        ["$", "#427a6a"],
+        ["§", "MediumSeaGreen"],
+        ["!", "MediumSeaGreen"],
+        ["\\", "#9e959e"],
+        ["/", palette.blueGrey, palette.white],// "#9e959e"],
+        ["╲", "#9e959e"],
+        ["[", "MediumSeaGreen"],
+        ["]", "Aquamarine"],
+        ["{", "Red"],
+        ["}", "Violet"],
+        ["a", "Aquamarine"],
+        ["b", "Blue"],
+        ["c", "Cyan"],
+        ["d", "DarkSalmon"],
+        ["e", palette.cyan],//"CadetBlue"],
+        ["f", "PeachPuff"],
+        ["g", "Green"],
+        ["h", "#a9d1ad"],
+        ["i", "MediumSeaGreen"],
+        ["j", "MediumSeaGreen"],
+        ["k", palette.lightGrey],//"#706468"],
+        ["l", "Lavender"],
+        ["m", "#3e9c6e"],
+        ["n", "MediumSeaGreen"],
+        ["o", "#eba054"],
+        ["p", "pink"],
+        ["q", "MediumSeaGreen"],
+        ["r", "Red"],
+        ["s", "SeaGreen"],
+        ["t", "Teal"],
+        ["u", "BlueViolet"],
+        ["v", "#ffdfff"],//"Violet"],
+        ["w", palette.green],//"DarkSeaGreen"],
+        ["x", palette.white],//"#706664", "#79736a"],
+        ["y", "Yellow"],
+        ["z", "#bfbfbf"],
+        ["H", "#966a3b"],      
+      ]
+
+      const allReplacements = characterColours.map(d => d[0])
+
+      // // check each character once to see if it should be replaced
+      // value_rows = value.split("\n").map(d => {
+      //   return d.split("").map(dd => {
+      //     if (dd == " ") {
+      //       return "·"
+      //     }
+      //     else if (allReplacements.includes(dd)) {
+      //       const replacement = characterColours.find(ddd => ddd[0] == dd)[1]
+      //       return `<span style="color:${replacement};">${dd}</span>`
+      //     } else {
+      //       return `<span style="color:white;">${dd}</span>`
+      //     }
+      //   }).join("")
+      // })
+
+      const value_rows = value.split("\n")
+
+      const rendered_rows = []
+      let lastChar = ""
+      for (let i = 0; i < nRows; i++) {
+        const row = value_rows[i]
+        rendered_row = []
+        let pos = 0
+        
+        // handle plain text lines
+        if (row[0] == ">") {
+          rendered_rows.push([`<span style="color:white;">${row}</span>`])
+          continue
+        }
+
+        while (pos < nColumns) {
+
+          // if (pos == 1) {
+            // rendered_row.push(" ")
+          // }
+
+          // handle commands
+          if (row[pos] == "/") {
+            // read ahead for key words          
+
+            let command = "/command"
+            if (row.slice(pos).startsWith(command)) {
+              // row = row.slice(command.length)
+              rendered_row.push("<span style='color:#ffdd99;'>/command</span>")
+              pos += command.length
+              continue
+            } 
+            command = "/bed"
+            if (row.slice(pos).startsWith(command)) {
+              // row = row.slice(command.length)
+              rendered_row.push("<span style='color:#ffdd99;'>/bed</span>")
+              pos += command.length
+              continue
+            } 
+          }
+
+          // process character as normal
+          const dd = row[pos]
+          if (!dd) {
+            console.log("not dd", dd)
+            rendered_row.push("·")
+          }
+          else if (dd == " ") {
+            rendered_row.push("·")
+          } else if (allReplacements.includes(dd)) {
+            const replacement = characterColours.find(ddd => ddd[0] == dd)
+            let colour = replacement[1]
+            // if (dd == lastChar && replacement.length > 2) {
+            if (replacement.length > 2) {
+              colour = replacement[Math.floor(Math.random() * (replacement.length - 1)) + 1]
+              lastChar = ""
+            } else {
+              lastChar = dd
+            }
+            rendered_row.push(`<span style="color:${colour};">${dd}</span>`)
+          } else {
+            rendered_row.push(`<span style="color:white;">${dd}</span>`)
+          }
+          pos++  
+        }
+        rendered_rows.push(rendered_row.join(""))
+      }
+
+      value = rendered_rows.join("\n")
+
+      // convert pinboard value to overlay HTML
+      // value = value.replace(/ /g, '·').replace(/[^·\nf#|]/g, ' ')
+      // .replaceAll('#', '<span style="color: #de6b24;">#</span>')
+      // .replaceAll('|', '<span style="color: #eeaaff;">|</span>')
+
+      // for (let i = 0; i < characterColours.length; i++) {
+        // value = value.replaceAll(characterColours[i][0], `<span style="color: ${characterColours[i][1]};">${characterColours[i][0]}</span>`)
+      // }
+      
+
+      return value
+    }
+
+    const nColumns = 32;
+    const nRows = 32;  // make sure rows don't exceed the element height
+
+    document.addEventListener("DOMContentLoaded", e => {
+
+      const grids = document.querySelectorAll(".gridinput")
+      const pinboards = document.querySelectorAll(".pinboard")
+      console.log(pinboards)
+
+      
+      for (const pinboard of pinboards) {
+        const grid = pinboard.querySelector(".gridinput")
+        const overlay = pinboard.querySelector(".gridoverlay")
+        
+        // initial value
+        // grid.value = " " //levels["1,0"]
+        grid.value = Array(nRows).fill(" ".repeat(nColumns)).join("\n")
+        overlay.innerHTML = parsePinboard(grid.value)
+
+        const playerElement = pinboard.querySelector(".sprite")
+        console.log(grid.offsetHeight, grid.offsetWidth)
+        const onLevelLoad = (event) => { 
+          console.log("load level", event)
+
+          // just load level 2 every time
+          let level = levels[`${event.x},${event.y}`]
+          if (!level) {
+            console.log("no level", event, "- creating level")
+            // create the level
+            level = levels[`${event.x},${event.y}`] = Array(nRows-1).fill(" ".repeat(nColumns)).join("\n") + "\n" + "#".repeat(nColumns)
+          }
+          grid.value = cleanseGridValue(level, nRows, nColumns)
+          overlay.innerHTML = parsePinboard(grid.value)
+        }
+          
+        // when the text area is selected replace all spaces with '·'
+        grid.addEventListener("focus", () => {
+          console.log("focus grid")
+          // grid.value = grid.value.replace(/ /g, '·')
+          // overlay.innerHTML = parsePinboard(grid.value)
+        })
+        grid.addEventListener("focusout", () => {
+          // overlay.innerHTML = parsePinboard(grid.value)
+        })
+
+        grid.addEventListener("input", e => {
+
+          // get user's cursor position so we can restore it after the update
+          var sel = getInputSelection(grid);
+
+          // // make sure we always have the same number of lines
+          // let valueArr = [...grid.value.split("\n"), ...Array(nRows).fill(" ".repeat(nColumns))]
+          // valueArr = valueArr.slice(0, nRows)
+
+          // // make sure each line is exactly the right length. add '·' or remove characters
+          // valueArr = valueArr.map((d, i) => {
+          //   // TODO: data is lost
+          //   return (d + " ".repeat(nColumns)).slice(0, nColumns)
+          // })
+
+          // grid.value = valueArr.join("\n")
+          grid.value = cleanseGridValue(grid.value, nRows, nColumns)
+          overlay.innerHTML = parsePinboard(grid.value)
+          if (e.data === null && e.inputType === "insertLineBreak") {
+            console.log("new line", e, sel)
+            sel.start += nColumns
+            sel.end += nColumns
+          }
+          setInputSelection(grid, sel.start, sel.end);
+        })
+
+        
+
+      }
+
+    })
+
+function generateLevel() {
+
+  // level creator
+  const levelEditor = document.querySelector(".levelEditor")
+  const charPalette = "%ø>+-////···"  // low density underground texture
+  // const charPalette = "#NW%ø0XXKxxkZZzz>+-////···"  // underground texture
+  // TODO: perlin noise?
+  
+  for (let i = 0; i < nRows; i++) {
+    for (let j = 0; j < nColumns; j++) {
+      const element = document.createElement("span")
+      
+      element.innerText = charPalette[Math.floor(Math.random() * charPalette.length)]
+      if (j == 0 && element.innerText == ">") {
+        element.innerText = "·"
+      }
+      
+      element.addEventListener("mouseover", e => {
+        element.innerHTML = "&nbsp;"
+      })
+      
+      levelEditor.appendChild(element)
+    }
+    const newLine = document.createElement("span")
+    newLine.innerText = "\n"
+    levelEditor.appendChild(newLine)
+  }
+}
+// generateLevel()
+  
+</script>

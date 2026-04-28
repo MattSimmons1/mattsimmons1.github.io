@@ -388,6 +388,7 @@
         const row = value_rows[i]
         rendered_row = []
         let pos = 0
+        if (!row) continue;
         
         // handle plain text lines
         if (row[0] == ">") {
@@ -556,10 +557,10 @@
    wmww#%x#zx0hzwwzww           
 ww ø#%XvW k vx#x#kx·X+wwmwww    
 X/            X/ xk0#/·/Z%www   
-+K/0kW              0+x/%·xkwww 
-/øN··X+K#               #/xz->øw
-·Z#+X/>Kx#                 X··+#
-·/···xZ/kN                  xxz·
++K/0kW             #0+x/%·xkwww 
+/øN··X+K#       #>W+z/>-e/xz->øw
+·Z#+X/>Kx#       z#xX#0XZ#zX··+#
+·/···xZ/kN            v  v #xxz·
 /-··/x-%kv    #%#0          Kk·x
 ·x/·k·zZX     N/·XWkx%zz#     W-
     · xøz     ZW#x+/0/x>W#K    #
@@ -843,7 +844,7 @@ x<ZX#X####+##X#xW#W#@  #####z###
    /./<·X##X#ø ######/ /####ø###`
 
 
-square = `                                
+const square = `                                
                                 
                                 
                                 
@@ -902,7 +903,7 @@ hfwehviuehwfoierfveliuhrfpiuerhk
 hrfljhkebfliuehflkjheflkuhelkjhe
 `
 
-scaryDoor = ` - /+X                z#-/x / + 
+const scaryDoor = ` - /+X                z#-/x / + 
  /- x-x+               Z#+/+ /  
  x/X xW WZz              #Zx/ / 
 +  //WX                  z/ z / 
@@ -1052,35 +1053,35 @@ const fall = `·//·+#
 /·/·-xz                         
 ····>->                         
 -+x/z+#                         
-+·+ %>#                         
++·+W%>#                         
 -·Z#  v                         
 -·/+#   A                       
 ·//·/+A A                       
 ··->·//>#                       
-////%->+·>xz                   -
--/-ø+-/ø-/xZX             /%-//ø
-%>-%+·%>-·ø%#      /ø/%·ø-ø·/-%-
-/ø·-/-/%ø>-/ #  #     >··  /··->
-//··%//>/-·#x# ZX  /   /···%%/·-
-·%>··-·/·+·+z# z>z#///  / / /%·>
-·+·/ø·/·/>·//Z 0X#x/·//·   >- ··
-/···//%//··/X# Ze/·ø//·/%··  -  
- >/%/··ø/·-·+X xZ>·/+/-·-·%%/  ·
-/+·+>/··-/-·%0 Xe->->/·-//·/ø/> 
--/ %·>+>+ø+ø·# #X·øø·/···/%/ø-··`
+////%->+·>xz                   #
+-/-ø+-/ø-/xZX             e#zXZz
+%>-%+·%>-·ø%#    #ZWø#%Wø#ø·/-%+
+/ø·-/-/%ø>-/z#  #/e·#0>··/·/··->
+//··%//>/-·#xz ZX+/+/··/···%%/·-
+·%>··-·/·+·+z# z>z#///··/·/·/%·>
+·+·/ø·/·/>·//Z xX#x/·//··/·>-···
+/···//%//··/+# Z//·ø//·/%··+·-··
+ >/%/··ø/·-·+X xZ>·/+/-·-·%%/···
+/+·+>/··-/-·%0 Xe->->/·-//·/ø/>·
+-/·%·>+>+ø+ø/M #X·øø·/···/%/ø-··`
 
 const cavity = `-%>·>·ø·-+>/#X #·ø+//øø/ø/·/-+/·
 /%-+%%ø-/·ø·/# #%>/··//··>·->·>>
 /+-+·/øøø>//+Z #ø//···/+>··+/·+·
-////+·%0v##·%X x·/ø··ø++·ø/+//%/
-···-%ø-#  %+/# z/·//%/>·ø+···ø--
+////+·%0v  v%X x·/ø··ø++·ø/+//%/
+···-%ø-#    /# z/·//%/>·ø+···ø--
 /·/X//xz#   #X #>//··/·x#%0·////
-·+>#0x/x/·//#x 0ø/·>-/·#   %//+%
-+/>   v#/ø>/z# z/·/·-/X#  #///ø>
+·+>#0x/x/W//#x 0ø/·>-/·z   %//+%
++/>   v#/ø>/z# z/·/·-/X#  x///ø>
 ·>-X    +·/·Xx z/%·e+/+>#  >%//%
 · x++   v#/%øx #xx/·-··%  0/+·%·
-%/ />    +z//0 X/ø·+%·X#  #+ø-/·
-·-/>xA   z+·/# ø+·%··+ø0  #·/-/-
+%/ />    +z//0 X/ø·+%·X/  #+ø-/·
+·-/>xA   z+·/# ø+·%··+ø0  z·/-/-
 ··/x-x   Z·>·X xX·>/->-#  Xz/·>·
 //%+·0Ax# +%/z #/·%·øøZz  #·/·-+
 /--/z #z//··/Z xø>·+/-+#   %-+-/
@@ -1231,13 +1232,13 @@ zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 
 
 const skele = `            
-            
-   BOO!   
-            
-            
+
+   
+
+
                  --¬            
                 {ø.ø}           
-                  =             
+   BOO!           =             
                   |             
                 *-*-**          
                / EE33|          
@@ -1262,12 +1263,79 @@ zzzzzz
             zzzzzzzz
             ========`
 
+const weird1 = `                                
+                                
+                   each         
+                                
+                                
+                         s=fe   
+                                
+                                
+                   vep          
+                  e             
+                                
+                                
+                fe              
+                                
+zzzzth%                         
+====  e               wa/ned    
+       se                       
+                   be           
+                  %             
+           %da/*                
+                                
+   an                             
+                                
+                                
+       tail                     
+                                
+                                
+             f                  
+              ree               
+                        sov:less
+                                
+                                
+`
+
+const helix = `                                
+                                
+                                
+      [***]                     
+       [***]                    
+        [***]                   
+         [***]                  
+        [***]                   
+       [***]                    
+                                
+                                
+      [***]                     
+       [***]                    
+        [***]                   
+         [***]           zzzzzzz
+        [***]            =======
+       [***]                    
+                                
+zzz             [***]           
+===   [***]                     
+       [***]                    
+        [***]                   
+         [***]                  
+        [***]                   
+       [***]                    
+                                
+                                
+                                
+      [***]                     
+       [***]                    
+        [***]                   
+         [***]                  `
+
 
 const levels = {
   "0,0": orchard, "1,0": house, "2,0": cliff, "3,0": cliff2,
   "0,1": crossCave, "1,1": bend, "2,1": cave2, "3,1": airPocket,
   "0,2": slide, "1,2": depths2, "2,2": scaryDoor, "3,2": temple1, "4,2": bridge, "5,2": skele,
-  "1,3": fall,                                    "3,3": glitch,
+  "1,3": fall,                  "2,3": square, "3,3": glitch,  "4,3": helix,  "5,3": weird1,
   "1,4": cavity,
   "1,5": abyss,
 }
@@ -1276,11 +1344,12 @@ const levels = {
 // draw world map
 
 // const worldMap = document.querySelector(".worldMap")
-// worldMap.style.gridTemplateColumns = "repeat(3, 1fr)"
-// worldMap.style.gridTemplateRows = "repeat(3, 1fr)"
+// worldMap.style.gridTemplateColumns = "repeat(6, 1fr)"
+// worldMap.style.gridTemplateRows = "repeat(6, 1fr)"
 
 // Object.keys(levels).forEach(d => {
 //   const mapTile = document.createElement("p")
+//   console.log(d)
 //   mapTile.innerHTML = parsePinboard(cleanseGridValue(levels[d]))
 
 //   mapTile.setAttribute("class", "mapTile")
