@@ -495,7 +495,7 @@
 
 
           let level;
-          if (event.y >= 6) {
+          if (event.y >= 7) {
             level = levels["1,0"]
             // reset world to the first level
             game.world.level = {x:1, y:0}
@@ -655,28 +655,28 @@ const cliff = `
                                 
                                 
                                 
-                      wwwhwwhmww
-        wwmzwwwwzwwhww*wmwmw*whm
-wwwwwmwwwwx%wxmwx%wxhxxwxwwxxwwx
-x%hxhxMmxx%xx%xx%xx%xx%xx%xx%xe 
-%eXz%eXz%eXz%eXz%eXz+X###z%X%%%%
-x#%eXz%x+Xz%eXz%x+Xz%eXz%x+Xz%eX
-zx#  %eXz%x+Xz%eXz%x+Xz%@Xz%x+Xz
-%e%eXz%-·Xz%eXz%x+Xz%eXz%x+Xz%eX
-%eXz%x+/z%eXz%x+X@%@Xz%x+Xz%eXxx
-xxxxx%e/z%x+Xz%eX/%x+Xz%@Xz%x+Xz
-XXXXX#XXM%eXz%x+@z%eXz%x+Xz%eXz%
-X%%·Xz%x+Xz%eXz%x/X//%eXz%x+Xz%e
-Xxx·>%eXz%x+@z%@@z%x+Xz%eXz%x+Xz
-X//x-/ Mx%eXz%x+Xz//Xz%x+Xz%@Xz%
- x%eXz%x+Xz%eXz%x+Xz%eXz%x+Xz%eX
-  @ @%eXz%x+Xz%eXz@x+Xz%eXz%x+Xz
-   XXxx#    z%x+X@%#Xz%x+Xz%eXz%
-     z%x     Xz%x+Xz%eXz%x+Xz%@@
-#     +  %x    eXzz%x+Xz%eXz%x+X
-%z#      %eX   +Xz%eXz%x+Xz%eXz%
-XXX%eXz%x+Xz%   %x+Xz%eXz%x+Xz%e
-XxXxx%eXz%x+Xz  Xz%x+Xz%eXz%x+Xz`
+                      wwwh*whmww
+        wwmzwwwwzwwhww*wmwvw*whm
+wwwwwmwwww##w#mwx%wxhxmwxwwxvwwx
+#%hxh#Wmxh%xxhx#Zøx%#Z/x#/#+%#·/
+%#Xz·/Xz%·/z%-/z/+/ø/%/-·-·>/x+·
+/·%//z/x+/z//Z··/·/>ø·>X·/ø//···
+-·<//··//·/··/+·-/·/x·x-//·#·+·/
+-//···/·-··/··/-···+//·>··-/·/·/
+····/=·/>·/··/··/·/···///·····/-
+··/··>/·-/-·=··/··/·+···/-//····
+/·/··//·/··/··/·/···/·/·+····/·-
+·/·=····························
+··+·-··/··/·-·/-·>··/····/+··/··
+X//%·>···x·=··%·······-·······x-
+ x%ø··>·+///Z·>·/·/··/······/·· 
+  @x/%/øz#x+Xz/X·/>··=·/··/···/·
+   WXx/x    z%x+/·#/············
+     z%v     <z%x+··>···/·······
+#     +  %x  v >Xz/·z/···-/·/···
+%z#      >-X   +/z%··>···/······
+X/X%zXz#x+/z%   %/·#/·/·-+·>·/··
+··/·x%/Xz%·/Zz  z>%/>xW>/·//····`
 
 cliff2 = `                                
                                 
@@ -1136,6 +1136,39 @@ const abyss = `·%>·X#·#·+·+x#ZX0#x   #XZ+zx··/·
                                 
                                 `
 
+abyss2 = `                                
+         .                   °  
+    \`          ·                
+·                             · 
+                        ·       
+           °                    
+ °                              
+        ·                       
+                               \`
+                           .    
+                                
+     *                          
+              .                 
+                                
+                                
+                             ·  
+                                
+       ·                        
+                                
+                                
+                           *    
+  .             ·               
+                                
+                                
+                                
+                                
+        *                       
+                                
+                                
+                              ° 
+   ·                            
+                         .      `
+
 const glitch = `                                
                                 
                                                                                                                           
@@ -1230,6 +1263,106 @@ zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
     W#W       W#W       W#W     
     MMM       MMM       MMM     `
 
+
+const innerTemple0 = `                                
+                                
+                                
+                                
+                                
+                                
+                                
+                            zzzz
+                            ====
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+  INK•                              
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                `
+
+const innerTemple1 = `                                
+                                
+                                
+                                
+                                
+                                
+                                
+zzzz     =     =====            
+====     ^     ^^^^^            
+                                
+                        ==      
+                        ^^      
+                                
+                     ==         
+                     ^^         
+             =   ==             
+   =         ^   ^^             
+   ^                            
+       ==                       
+       ^^==                     
+         ^^=====                
+           ^^^^^                
+                         zzzzzzz
+                    ==   =======
+                    ^^      #0øx
+               ==            ##/
+               ^^             X#
+          ==                  zZ
+          ^^                  #/
+                             W0>
+##A#X#z#x  x<A  xA zX#x0   xZ%##
+/##x%ø#%#AX#0e##Xx0#xZ#zxX##x#0#`
+
+
+const innerTemple2 = `                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+zzzzzzz                         
+=======                         
+X##ø                            
+/0x        ==                   
+%#         ^^==                 
+#x           ^^==               
+/#             ^^               
+/#x                ==           
+#xze##XA0#A###xX#z#xX==   øxA   
+X#Xz/x>z>%´#x%ø#%#AX#0e##Xx0#xZ#`
 
 const skele = `            
 
@@ -1331,35 +1464,103 @@ zzz             [***]
          [***]                  `
 
 
+const cyberspace = `                                
+                                
+                                
+                                
+                                
+Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=
+=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ
+Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=
+=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ=Ξ
+                                
+                                
+                                
+VΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛ
+ΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛV
+VΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛ
+ΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛVΛV
+                                
+                                
+                                
+                                
+                                
+                                
+Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>
+<V<V<V<V<V<V<V<V<V<V<V<V<V<V<V<V
+Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>
+<V<V<V<V<V<V<V<V<V<V<V<V<V<V<V<V
+Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>
+<V<V<V<V<V<V<V<V<V<V<V<V<V<V<V<V
+Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>
+<V<V<V<V<V<V<V<V<V<V<V<V<V<V<V<V
+Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>Λ>`
+                                
+
+const worm = `                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                           mghsh
+                          mghshm
+         doffvvv         mghshmw
+        doffvvv         mghshmwg
+       doffvvv         mghshmwgs
+      doffvvv         mghshmwgsh
+     doffvvv         mghshmwgshm
+                    mghshmwgshmw
+                   mghshmwgshmwg
+                  mghshmwgshmwgs
+                 mghshmwgshmwgsg
+                mghshmwgshmwgsgw
+               mghshmwgshmwgsgws
+              mghshmwgshmwgsgwsm
+             mghshmwgshmwgsgwsmg
+            mghshmwgshmwgsgwsmgw
+           mghshmwgshmwgsgwsmgws
+          mghshmwgshmwgsgwsmgwsh
+         mghshmwgshmwgsgwsmgwshw
+        mghshmwgshmwgsgwsmgwshwg
+       mghshmwgshmwgsgwsmgwshwgh`
+
 const levels = {
   "0,0": orchard, "1,0": house, "2,0": cliff, "3,0": cliff2,
   "0,1": crossCave, "1,1": bend, "2,1": cave2, "3,1": airPocket,
   "0,2": slide, "1,2": depths2, "2,2": scaryDoor, "3,2": temple1, "4,2": bridge, "5,2": skele,
-  "1,3": fall,                  "2,3": square, "3,3": glitch,  "4,3": helix,  "5,3": weird1,
-  "1,4": cavity,
+  "1,3": fall,                  "2,3": square, "3,3": innerTemple0,  "4,3": innerTemple1,  "5,3": innerTemple2,
+  "1,4": cavity,                "2,4": weird1, "3,4": glitch,  "4,4": cyberspace, "5,4": helix,
   "1,5": abyss,
+  "1,6": abyss2,
+  
 }
 
 
 // draw world map
 
-// const worldMap = document.querySelector(".worldMap")
-// worldMap.style.gridTemplateColumns = "repeat(6, 1fr)"
-// worldMap.style.gridTemplateRows = "repeat(6, 1fr)"
+const worldMap = document.querySelector(".worldMap")
+worldMap.style.gridTemplateColumns = "repeat(6, 1fr)"
+worldMap.style.gridTemplateRows = "repeat(6, 1fr)"
 
-// Object.keys(levels).forEach(d => {
-//   const mapTile = document.createElement("p")
-//   console.log(d)
-//   mapTile.innerHTML = parsePinboard(cleanseGridValue(levels[d]))
+Object.keys(levels).forEach(d => {
+  const mapTile = document.createElement("p")
+  console.log(d)
+  mapTile.innerHTML = parsePinboard(cleanseGridValue(levels[d]))
 
-//   mapTile.setAttribute("class", "mapTile")
+  mapTile.setAttribute("class", "mapTile")
 
-//   const [column, row] = d.split(",")
+  const [column, row] = d.split(",")
 
-//   mapTile.style.gridColumn = parseInt(column) + 1
-//   mapTile.style.gridRow = parseInt(row) + 1
-//   worldMap.appendChild(mapTile)
-// })
+  mapTile.style.gridColumn = parseInt(column) + 1
+  mapTile.style.gridRow = parseInt(row) + 1
+  worldMap.appendChild(mapTile)
+})
 
 
 // level creator
