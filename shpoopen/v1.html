@@ -135,6 +135,7 @@
       turquoise: "#a0bab0",
       darkRed: "#955b69",
       red: "#ffd3c4",
+      yellow: "#f3f1e6",
       lightYellow: "#faf8c5",
       blue: "#bcd6f2",
       lightPink: "#e7bab7",
@@ -144,6 +145,7 @@
       lightGreen: "#daffc9",
       darkGreen: "#62665a",
       cyan: "#c9ffee",
+      sand: "#dedbc9",
     }
 
     function cleanseGridValue(value, nRows, nColumns) {
@@ -233,14 +235,14 @@
       const characterColours = [
         // in order of brightness
         // ["●", "#393130", "#999997"],
-        ["#", palette.white, palette.lightGrey, palette.lightBlue],
+        ["#", palette.lightGrey],
         ["@", palette.white],//, "#595160", "#999997"],
         ["W", palette.lightYellow],//"#696170", "#999997"],
-        ["X", palette.red, palette.lightGreen],//, "#797180", "#999997"],
-        ["N", palette.lightGrey, "#ffe8e4"],
-        ["E", palette.darkRed, "#f8eae8"], // brick
+        ["X", palette.red],//, "#797180", "#999997"],
+        ["N", "#ffe8e4"],
+        ["E", "#f8eae8"], // brick
         ["F", "#ffe8e4"],
-        ["Z", palette.darkYellow, palette.cyan],//"#797180", "#999997"],
+        ["Z", palette.cyan],//"#797180", "#999997"],
         ["0", palette.white],//"#494150", "#999997"],
         ["%", palette.white],//"#a38c87"],
         ["œ", "#a08481", "b58481"],
@@ -276,39 +278,38 @@
         ["§", "MediumSeaGreen"],
         ["!", "MediumSeaGreen"],
         ["\\", "#9e959e"],
-        ["/", palette.blueGrey, palette.white],// "#9e959e"],
+        ["/", palette.blueGrey, palette.white],
         ["╲", "#9e959e"],
         ["[", "MediumSeaGreen"],
-        ["]", "Aquamarine"],
+        ["]", "#defeff"],
         ["{", "Red"],
-        ["}", "Violet"],
-        ["a", "Aquamarine"],
-        ["b", "Blue"],
-        ["c", "Cyan"],
-        ["d", "DarkSalmon"],
-        ["e", palette.cyan],//"CadetBlue"],
+        ["}", "ffdfff"],
+        ["a", "#defeff"],
+        ["b", palette.sand],
+        ["c", palette.cyan],
+        ["d", "#ffcedf"],
+        ["e", palette.white],
         ["f", "PeachPuff"],
-        ["g", "Green"],
+        ["g", "#ceffce"],
         ["h", "#a9d1ad"],
-        ["i", "MediumSeaGreen"],
-        ["j", "MediumSeaGreen"],
-        ["k", palette.lightGrey],//"#706468"],
+        ["i", palette.blueGrey],
+        ["j", palette.lightYellow],
+        ["k", palette.lightGrey],
         ["l", "Lavender"],
-        ["m", "#3e9c6e"],
-        ["n", "MediumSeaGreen"],
-        ["o", "#eba054"],
-        ["p", "pink"],
-        ["q", "MediumSeaGreen"],
-        ["r", "Red"],
-        ["s", "SeaGreen"],
-        ["t", "Teal"],
-        ["u", "BlueViolet"],
-        ["v", "#ffdfff"],//"Violet"],
-        ["w", palette.green],//"DarkSeaGreen"],
-        ["x", palette.white],//"#706664", "#79736a"],
-        ["y", "Yellow"],
+        ["m", "#aeecce"],
+        ["n", "#99ddff"],
+        ["o", "#fbc0a4"],
+        ["p", "#ffeeee"],
+        ["q", "#ffccdd"],
+        ["r", "#ffeeee"],
+        ["s", "#ceffdc"],
+        ["t", "#eeeeff"],
+        ["u", "#efdcff"],
+        ["v", "#ffdfff"],
+        ["w", palette.green],
+        ["x", palette.white],
+        ["y", palette.yellow],
         ["z", "#bfbfbf"],
-        ["H", "#966a3b"],      
       ]
 
       const allReplacements = characterColours.map(d => d[0])
@@ -343,6 +344,7 @@
           continue
         }
 
+
         while (pos < nColumns) {
 
           // if (pos == 1) {
@@ -360,13 +362,54 @@
               pos += command.length
               continue
             } 
-            command = "/bed"
+            command = "/light"
             if (row.slice(pos).startsWith(command)) {
               // row = row.slice(command.length)
-              rendered_row.push("<span style='color:#ffdd99;'>/bed</span>")
+              rendered_row.push("<span style='color:#ffdd99;'>/light</span>")
               pos += command.length
+
+              // activate light mode
+              document.querySelector("html").style.filter = "invert() grayscale(1) brightness(1.1)";
+
               continue
             } 
+            command = "/dark"
+            if (row.slice(pos).startsWith(command)) {
+              // row = row.slice(command.length)
+              rendered_row.push("<span style='color:#ffdd99;'>/dark</span>")
+              pos += command.length
+
+              // activate dark mode
+              document.querySelector("html").style.filter = "unset";
+
+              continue
+            } 
+          }
+
+          // handle hex codes
+          if (row[pos] == "#") {
+            const startPos = pos;
+            // read ahead to check for valid hex code
+            let hexCode = "#"
+            pos++
+            while (pos < nColumns) {
+              if ("0123456789abcdef".includes(row[pos].toLowerCase())) {
+                hexCode += row[pos]
+                pos++
+              } else {
+                break
+              }
+              
+            }
+            if (CSS.supports('color', hexCode)) {
+            // if (hexCode.length === 7) {
+              console.log(CSS.supports('color', hexCode))
+              rendered_row.push(`<span style="color:${hexCode};">${hexCode}</span>`)
+              continue
+            } else {
+              pos = startPos
+            }
+                // if (len(hexCode) == 6 || len(hexCode) == 8 || len(hexCode) == 4 || len(hexCode) == 3) {
           }
 
           // process character as normal

@@ -651,17 +651,17 @@ const cliff = `
                                 
                                 
                                 
-                                
-                                
-                                
-                                
-                      wwwh*whmww
-        wwmzwwwwzwwhww*wmwvw*whm
-wwwwwmwwww##w#mwx%wxhxmwxwwxvwwx
-#%hxh#Wmxh%xxhx#Zøx%#Z/x#/#+%#·/
-%#Xz·/Xz%·/z%-/z/+/ø/%/-·-·>/x+·
-/·%//z/x+/z//Z··/·/>ø·>X·/ø//···
--·<//··//·/··/+·-/·/x·x-//·#·+·/
+                      wh        
+                      zZ*       
+                ww    xzv       
+          wh    øk     mhw    wh
+                      #øwh*whmww
+     wm               *#/wvw*whh
+wwwwwmhwww##w#mwx      wxwøxv·wx
+#%hxh#Wmxh%xxhx#Zø     x#/#+%#·/
+%#Xz·/Xz%·/z%-/z/+whww/-·-·>/x+·
+/·%//z/x+/z//Z··/·øxhx>X·/ø//··/
+-·<//··//·/··/+·-/x·#Z·/x·x-//·#
 -//···/·-··/··/-···+//·>··-/·/·/
 ····/=·/>·/··/··/·/···///·····/-
 ··/··>/·-/-·=··/··/·+···/-//····
@@ -669,7 +669,7 @@ wwwwwmwwww##w#mwx%wxhxmwxwwxvwwx
 ·/·=····························
 ··+·-··/··/·-·/-·>··/····/+··/··
 X//%·>···x·=··%·······-·······x-
- x%ø··>·+///Z·>·/·/··/······/·· 
+ x%ø··>·+///Z·>·/·/··/······/··/
   @x/%/øz#x+Xz/X·/>··=·/··/···/·
    WXx/x    z%x+/·#/············
      z%v     <z%x+··>···/·······
@@ -678,23 +678,23 @@ X//%·>···x·=··%·······-·······x-
 X/X%zXz#x+/z%   %/·#/·/·-+·>·/··
 ··/·x%/Xz%·/Zz  z>%/>xW>/·//····`
 
-cliff2 = `                                
+const cliff2 = `                                
                                 
                                 
                                 
                                 
-                                
-                                
-                                
-                                
-      whwmw                     
-w%whmww%wwwhmwhwwww             
-#ø%ø>X/x#%W0zXzxX#/             
-Z%%%0·+/+-#/x>X#/+              
-//>/%//··-%·+XW                 
-/%··/··>%/ø/>x                  
+                              ww
+                              %/
+                      whww     #
+                       #%>      
+ww    whwmw*w                   
+w%whmww%wwwhm    ww             
+#ø%ø>X/x#%W0z    #/             
+Z%%%0·+/+-#/x    +              
+//>/%//··-%·+                   
+/%··/··>%/ø/>                   
 ·/ø·>·/+··-X/                   
-/·%%/-ø··/x0                    
+/·%%/-ø··/x0~~~~~~~~~~~~~~~~~~~~
 +·//·/+//+-#~~~~~~~~~~~~~~~~~~~~
 +//-/·/%>+Xz~~~~~~~~~~~~~~~~~~~~
 ··+%·//x·%x~~~~~~~~~~~~~~~~~~~~~
@@ -711,38 +711,61 @@ Z%%%0·+/+-#/x>X#/+
 ·/·//·+#~~~~~~~~~~~~~~~~~~~~~~~~
 /--%··%/~~~~~~~~~~~~~~~~~~~~~~~~`
 
-cave2 = `>·/···>+·+%·Z  #·/>ø/·/+///ø//+·
+
+const skyway = `                                
+                                
+                                
+                O8O               
+               O8OO8                
+whw     ww
+/#%     #k 
+#k 
+ 
+ 
+ 
+ 
+ 
+ 
+         wwwwmwhwwh
+        w#kø/+zk>+xz
+~~~~~~~zz#~~~#Z0#kZ~z~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+`
+
+const cave2 = `>·/···>+·+%·Z  #·/>ø/·/+///ø//+·
 ·-ø/·%///+·%x  W/+··/·-ø·%-//>+/
-+/·/>//··//   #/>%/+-/>·/·····/+
-··/>·-/>+%+   ///··-/·%ø+z%>%>ø/
++/·/>//··/0   #/>%/+-/>·/·····/+
+··/>z-/>+%+   W//··-/x%ø+z%>%>ø/
 //0W         Z>ø+%·v        0>>/
 ·%/z       zX··ø>v   #+>%%>  +//
 ·/zX   #xZø+·øX>#  +#//-%-·0 /·/
 /·>0    z/#ø#v    #/-/·%/Z#  >·ø
--/øW    -v      />/·>ø·/-W  %·/-
+-/øW    #v      />/·>ø·/-W  %·/-
 ø·/%/z+     ø/ø/>/-/·%+·%%  #··/
-·--%·/%     #+·/····/-ø>v  #X-+·
-·//>/·Z+  %##/·%·>/>#·øv   /%-/#
+·--%·/%     #+·/···z/-ø>v  #X-+·
+·//>/·Z+  %##/Z%v>x #zøv   /%-/#
 /·/Xz#/#+#/ v            %Xz/+# 
 /+%v #%>+           x+ø+X#-/+X  
 +%ø   ##           >/%·/·/ø+#   
 #      v          ø+·/>//+/+#   
-                    -/%/·/+#  /#
+                    #/%/·/+#  /#
 +0                   /%/·>/  #-+
-/x               #z  /-/#Z   //+
-/X∆    ∆          W   >vz  # /- 
-///∆   #         /#Z      ø/ />/
-ø··/0X#·#   ∆    0/<-/ø%/--/  %/
-··-ø/-··X  ∆#    #%·<·///·//- //
-/>/ø/·-//% ##  øø+/·%øz+>·//+  /
-···/x%//ø%-·ø·/>/ø+/X-Z/ //>/  >
-ø··/   #/%%ø·//·/·+/      +/  >·
-·+>x #  #+Zxzø%Xz/+  %       %·-
-·/+Z #X        #v>  -%/      ø·/
-///ø v %/+-/#>     zX·//>z#0>/+ø
-%·//    X+ø+>-//#Z>ø%//>-%/·/ø /
-/>/%#      x/%///%ø++%/%ø//+/+·/
-···>%/#       z///·->/+ø>->//%··`
+/x               #z  #-/#Z   Z/+
+/X∆    ∆          W   >vz  # 0- 
+///∆   #         /#Z      ø# />/
+ø··/0X#·#   ∆    0/<+Zø%/#M0  %/
+··-ø/-··X  ∆#    #%·<·///·//# #M
+/>/ø/·-//% ##  øø+/·%øz+>·//+  0
+···/x%//ø%-·ø·/>/ø+/X-ZW #/>#  #
+ø··W   #/%%ø·//·/·#M      +/  >·
+·+>x #  #+Zxzø%Xz/+  #       %·-
+·/+Z #X        #v>  0%#      ø·/
+///ø v %M+0/#>     zX·/Z>z#0>/+ø
+%·/0    X+ø+>øM##Z>ø%//>-%/·/ø /
+/>/%#      x#%///%ø++%/%ø//+/+·/
+···>%Z#       z///·->/+ø>->//%··`
 
 const airPocket = `·//+>·/#~~~~~~~~~~~~~~~~~~~~~~~~
 ·/>/·//ø~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1530,8 +1553,74 @@ const worm = `
         mghshmwgshmwgsgwsmgwshwg
        mghshmwgshmwgsgwsmgwshwgh`
 
+const chess = `                                
+                                
+                          xxxx  
+                        = xxxx  
+          xx              xxxx  
+          xx              xxxx  
+xx    xxxx     xxx    xxxx    xx
+xx    xxxx    xxxx   -xxxx    xx
+xx    xxxx    xxxx    xxxx    xx
+xx   zxxxx    xxxx    xxxx      
+  xxxx    xxx     xxxx     xxx^^
+  xxxx    xxxx    xxxx    xxxx  
+  xxxx    xxxx    xxxx    xxxx  
+  xxxx    xxxx    xxxx    xxxx  
+xx    xxxx     xxx    xxx     xx
+xx    xxxx    xxxx    xxxx    xx
+xx    xxxx    xxxx    xxxx    xx
+xx    xxxx    xxxx    xxxx    xx
+  xxxx     xxx     xx      xxx  
+  xxxx    xxxx    xxxx    xxxx  
+  xxxx    xxxx    xxxx    xxxx  
+  xxxx    xxxx    xxxx    xxxx  
+xx    xxx     xxx     xxxx    xx
+xx    xxxx    xxxx    xxxx    xx
+xx    xxxx    xxxx    xxxx    xx
+xx    xxxx    xxxx    xxxx    xx
+  xxxx    xxx      xxx    xxxx  
+  xxxx    xxxx    xxxx    xxxx  
+  xxxx    xxxx    xxxx    xxxx  
+  xxxx    xxxx    xxxx    xxxx  
+xx    xxxx    xxxx    xxxx    xx
+xx    xxxx    xxxx    xxxx    xx`
+
+const rando = `                                
+                                
+                                
+                                
+                                
+ rrrrr xxx oo oo                
+       xxx       www        x   
+ rrrrr xxx eeeee www       xx   
+                          xxx   
+ xxxxxxx c sss xx        xxxx   
+         c sss xx       x       
+ rrr xxx c sss         xx       
+ rrr xxx c sss o      xxx       
+                     xxxx       
+ wwwwwww xxx v v    x    xxxx   
+ wwwwwww xxx v v   xx    xxxx   
+                  xxx    xxxx   
+ nnn uuu uuu uuu xxxx    xxxx   
+ nnn uuu uuu uuu     xxxx       
+ nnn uuu uuu uuu     xxxx       
+     uuu uuu uuu     xxxx       
+ nnn uuu uuu uuu     xxxx       
+ nnn uuu uuu uuu xxxx    xxxx   
+ nnn uuu uuu uuu  xxx    xxxx   
+                   xx    xxxx   
+                    x    xxxx   
+                     xxxx       
+                      xxx       
+                       xx       
+                        x       
+                                
+                                `
+
 const levels = {
-  "0,0": orchard, "1,0": house, "2,0": cliff, "3,0": cliff2,
+  "0,0": orchard, "1,0": house, "2,0": cliff, "3,0": cliff2, "4,0": skyway,
   "0,1": crossCave, "1,1": bend, "2,1": cave2, "3,1": airPocket,
   "0,2": slide, "1,2": depths2, "2,2": scaryDoor, "3,2": temple1, "4,2": bridge, "5,2": skele,
   "1,3": fall,                  "2,3": square, "3,3": innerTemple0,  "4,3": innerTemple1,  "5,3": innerTemple2,
