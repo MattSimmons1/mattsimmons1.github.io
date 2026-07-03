@@ -960,7 +960,7 @@ x/ X#X####+##X#xW#W#@ZXz#F##z###
 z#z/./<·X##X#ø ####             `
 
 
-crossCave = ` />/W#%             X    #/%>-
+const crossCave = ` />/W#%             X    #/%>-
   x0##x>            W       Z>/%
 x>  0X- -    00    /X        X+/
     %x-      #X-+              W
@@ -1159,7 +1159,7 @@ const abyss = `·%>·X#·#·+·+x#ZX0#x   #XZ+zx··/·
                                 
                                 `
 
-abyss2 = `                                
+const abyss2 = `                                
          .                   °  
     \`          ·                
 ·                             · 
@@ -1619,43 +1619,76 @@ const rando = `
                                 
                                 `
 
+const solid = `nnnnxxnnnxxxxxnnxxxxnnnnnnnxnnnn
+nnnnxxxnnnxxxxnnxxnnnxnnnnnnnnvv
+nnnnnnnnnnnnnnnnnxxnnnnnnnvvnvnn
+nnnnnnnvvnnnvvnnnnnnnnnnnnvvnvnn
+nnnnnvvvvnnnnxnxnnnnnvvnnvnnvvvv
+nnnvvvvvvvvnnnvvxnnvvnnvnvvvnvvv
+nnnvvvvvvvvvnnnnvvnnnvvvvvvvnvcv
+nnnnvvvvvvvnnvvvvvvvvvvvvvvvvvvv
+nvnnvvvvvvvvvvnnvvnvvvvvvvccvnvv
+nvvvvvvvvvvnvnvvvvvccvvvvccccccc
+vvnnnvvcvvvvvvvvcccccccvvccccccc
+vvvvcvvvvnvvvvcvcccccccnvccccccc
+ccvvccccvvcccccccccccccvcccccccc
+ccccccccvvcccccccccccccccccccccc
+cccccccccccccvcccccccccccczzcccc
+cccccccccccccccccccccccccczccczz
+ccccccccccccccccccccccczcczccczz
+cccccccccczccccczcccczzccczczzzz
+ccccccczzzzzzzcczzczzzzzzzzzzzzz
+zzzzzzcccczzccccccccczzzzzzzzzzz
+zzccczzzczzzzczzzcczzcczzzzzXXzz
+zzzzzczzczzzzzcczzzzzzzzzzzzXXzz
+zzzzzczzcczzzzzzzzzzzzzzzzXzzzzz
+zzzzzczzzzXzzzzczzczzzzzzXzzzXzz
+zzzzzzzzzzXXzzzzzzczczzzzzXXzXXX
+zzzzzzzzzzzzzzzzzzzzzzzzzXXXXXXz
+zzzzzzzzzzzzzzzzXzzzzzXzzzXXXXXz
+zzzzzzzzzzzzXXzzzzzzzXXzzXXzXXXY
+zzzzzXXXXXzXXXzXXXzzzXzXXXXXYXXX
+XXXXXXXzzzzXzzXXXXzXzXzXXXXXYYYY
+zzzXXXXzzzzzXXXzXXXXXXXYYXXYYYYX
+zzzXXXXXXXXXXXXzzXYXXXXXXXXYYzYz`
+
 const levels = {
   "0,0": orchard, "1,0": house, "2,0": cliff, "3,0": cliff2, "4,0": skyway,
   "0,1": crossCave, "1,1": bend, "2,1": cave2, "3,1": airPocket,
   "0,2": slide, "1,2": depths2, "2,2": scaryDoor, "3,2": temple1, "4,2": bridge, "5,2": skele,
-  "1,3": fall,                  "2,3": square, "3,3": innerTemple0,  "4,3": innerTemple1,  "5,3": innerTemple2,
-  "1,4": cavity,                "2,4": weird1, "3,4": glitch,  "4,4": cyberspace, "5,4": helix,
-  "1,5": abyss,
-  "1,6": abyss2,
+                "1,3": fall,    "2,3": square, "3,3": innerTemple0,  "4,3": innerTemple1,  "5,3": innerTemple2,
+                 "1,4": cavity, "2,4": weird1, "3,4": chess,  "4,4": cyberspace, "5,4": helix,
+                 "1,5": abyss,
+                 "1,6": abyss2, "2,6": glitch,
   
 }
 
 
 // draw world map
 
-const worldMap = document.querySelector(".worldMap")
-worldMap.style.gridTemplateColumns = "repeat(6, 1fr)"
-worldMap.style.gridTemplateRows = "repeat(6, 1fr)"
+// const worldMap = document.querySelector(".worldMap")
+// worldMap.style.gridTemplateColumns = "repeat(6, 1fr)"
+// worldMap.style.gridTemplateRows = "repeat(6, 1fr)"
 
-Object.keys(levels).forEach(d => {
-  const mapTile = document.createElement("p")
-  console.log(d)
-  mapTile.innerHTML = parsePinboard(cleanseGridValue(levels[d]))
+// Object.keys(levels).forEach(d => {
+//   const mapTile = document.createElement("p")
+//   console.log(d)
+//   mapTile.innerHTML = parsePinboard(cleanseGridValue(levels[d]))
 
-  mapTile.setAttribute("class", "mapTile")
+//   mapTile.setAttribute("class", "mapTile")
 
-  const [column, row] = d.split(",")
+//   const [column, row] = d.split(",")
 
-  mapTile.style.gridColumn = parseInt(column) + 1
-  mapTile.style.gridRow = parseInt(row) + 1
-  worldMap.appendChild(mapTile)
-})
+//   mapTile.style.gridColumn = parseInt(column) + 1
+//   mapTile.style.gridRow = parseInt(row) + 1
+//   worldMap.appendChild(mapTile)
+// })
 
 
-// level creator
-const levelEditor = document.querySelector(".levelEditor")
-const charPalette = "%ø>+-////···"  // low density underground texture
-// const charPalette = "#NW%ø0XXKxxkZZzz>+-////···"  // underground texture
+// // level creator
+// const levelEditor = document.querySelector(".levelEditor")
+// const charPalette = "%ø>+-////···"  // low density underground texture
+// // const charPalette = "#NW%ø0XXKxxkZZzz>+-////···"  // underground texture
 
 // for (let i = 0; i < nRows; i++) {
 //   for (let j = 0; j < nColumns; j++) {
